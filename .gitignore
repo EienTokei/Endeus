@@ -1,0 +1,22 @@
+# 构建输出目录
+out/
+build/
+
+# Visual Studio 缓存
+.vs/
+CMakeUserPresets.json
+
+# vcpkg 本地安装
+vcpkg_installed/
+vcpkg-manifest-install.log
+
+# 可执行文件及中间文件
+*.exe
+*.dll
+*.obj
+*.pdb
+*.ilk
+
+# 用户本地配置
+*.user
+*.suo
