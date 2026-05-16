@@ -20,3 +20,17 @@ vcpkg-manifest-install.log
 # 用户本地配置
 *.user
 *.suo
+
+# 忽略所有素材文件
+assets/
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.wav
+*.ogg
+*.mp3
+*.ttf
+*.otf
+
+generate_assets_readme.py
