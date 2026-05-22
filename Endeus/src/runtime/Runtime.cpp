@@ -72,65 +72,29 @@ namespace endeus {
 			return;
 		}
 
-		auto& layer = m_layers[instr.layerId];
-		if (!layer.sprite) {
-			layer.sprite = std::make_unique<sf::Sprite>(*texIt->second);
-		}
-		else {
-			layer.sprite->setTexture(*texIt->second);
-		}
-
-		layer.sprite->setPosition({ instr.position.x, instr.position.y });
-		if (instr.texRect.width > 0 && instr.texRect.height > 0) {
-			layer.sprite->setTextureRect(sf::IntRect(
-				{ instr.texRect.x, instr.texRect.y },
-				{ instr.texRect.width, instr.texRect.height }
-			));
-		}
-		layer.order = instr.order;
-		layer.visible = true;
+		m_world.setLayer(instr.layerId, { instr.textureKey, instr.order, true, instr.position, 1.f , instr.texRect});
 	}
 
 	void Runtime::handleHideLayer(const Instruction::HideLayer& instr) {
-		auto it = m_layers.find(instr.layerId);
-		if (it != m_layers.end()) {
-			it->second.visible = false;
-		}
+		m_world.hideLayer(instr.layerId);
 	}
 
 	void Runtime::handleSetSpeaker(const Instruction::SetSpeaker& instr) {
-		m_speaker = instr.name;
-		m_speakerText->setString(toSF(m_speaker));
+		m_world.setSpeaker(instr.name);
+		m_speakerText->setString(toSF(m_world.getSpeaker()));
 	}
 
 	void Runtime::handleSetContent(const Instruction::SetContent& instr) {
-		if (instr.append) {
-			m_content += instr.content;
-		}
-		else {
-			m_content = instr.content;
-		}
-		m_contentText->setString(toSF(m_content));
+		m_world.setContent(instr.content, instr.append);
+		m_contentText->setString(toSF(m_world.getContent()));
 	}
 
 	void Runtime::handleChoice(const Instruction::Choice& instr) {
-		m_choiceState.active = true;
-		m_choiceState.options = instr.options;
-
-		float optionW = 300;
-		float optionH = 50;
-		float spaceY = 30;
-
-		int n = instr.options.size();
-		float startX = (static_cast<float>(m_window.getSize().x) - optionW) / 2;
-		float startY = (static_cast<float>(m_window.getSize().y) - optionH * n - spaceY * (n - 1)) / 2;
-
-		m_choiceState.optionRects.clear();
-		for (size_t i = 0; i < instr.options.size(); ++i) {
-			sf::FloatRect rect({ startX, startY + i * (optionH + 30) }, 
-							   { optionW, optionH });
-			m_choiceState.optionRects.emplace_back(rect);
+		std::vector<ChoiceOption> options;
+		for (const auto& opt : instr.options) {
+			options.emplace_back(ChoiceOption{opt.text, opt.targetLabel});
 		}
+		m_world.setChoice(std::move(options));
 	}
 
 	void Runtime::handleWaitForClick() {
@@ -139,13 +103,14 @@ namespace endeus {
 
 	void Runtime::onMouseClick(sf::Vector2i pos) {
 		// 优先级：选项 > 等待点击
-		if (m_choiceState.active) {
+		if (m_world.hasChoice()) {
 			sf::Vector2f fpos(static_cast<float>(pos.x), static_cast<float>(pos.y));
-			for (size_t i = 0; i < m_choiceState.optionRects.size(); ++i) {
-				if (m_choiceState.optionRects[i].contains(fpos)) {
+			const auto& optionRects = computeOptionRects();
+			for (size_t i = 0; i < optionRects.size(); ++i) {
+				if (optionRects[i].contains(fpos)) {
 					// 选中选项
-					std::string target = m_choiceState.options[i].targetLabel;
-					m_choiceState.active = false;
+					std::string target = m_world.getChoiceOptions()[i].targetLabel;
+					m_world.clearChoice();
 					m_eventBus.publish(Event::ChoiceSelected{ target });	// 发布选中事件
 					return;
 				}
@@ -157,23 +122,71 @@ namespace endeus {
 		}
 	}
 
-	void Runtime::draw(sf::RenderTarget& target) const {
-		// 1. 按 order 从小到大绘制图层
-		std::vector<std::pair<int, const Layer*>> sorted;
-		for (const auto& pair : m_layers) {
-			if (pair.second.visible && pair.second.sprite)
-				sorted.emplace_back(pair.second.order, &pair.second);
-		}
-		std::sort(sorted.begin(), sorted.end(),
-				  [](auto& a, auto& b) { return a.first < b.first; });
-		for (auto& [order, layer] : sorted) {
-			target.draw(*layer->sprite);
-		}
-
+	void Runtime::draw(sf::RenderTarget& target) {
+		syncDirtyLayers();
+		// 1. 图层
+		drawLayers(target);
 		// 2. 对话框
 		drawDialog(target);
 		// 3. 选项
 		drawChoices(target);
+	}
+
+	void Runtime::syncDirtyLayers() {
+		for (auto& [id, data] : m_world.allLayers()) {
+			if (data.dirty) {
+				auto texIt = m_textures.find(data.textureKey);
+				if (texIt == m_textures.end()) {
+					// 纹理不存在，跳过
+					data.dirty = false;
+					continue;
+				}
+
+				auto spriteIt = m_layers.find(id);
+				if (spriteIt == m_layers.end()) {
+					// 创建新 Sprite
+					auto sprite = std::make_unique<sf::Sprite>(*texIt->second);
+					m_layers[id] = std::move(sprite);
+				}
+
+				// 更新 Sprite 的属性
+				sf::Sprite* sprite = m_layers[id].get();
+				// 纹理改变
+				if (&sprite->getTexture() != texIt->second.get()) {
+					sprite->setTexture(*texIt->second, true);
+				}
+
+				sprite->setPosition({ data.position.x, data.position.y });
+
+				sf::Color color = sf::Color::White;
+				color.a = static_cast<unsigned char>(data.alpha * 255);
+				sprite->setColor(color);
+
+				if (data.texRect.width > 0 && data.texRect.height > 0) {
+					sprite->setTextureRect(sf::IntRect(
+						{ data.texRect.x, data.texRect.y },
+						{ data.texRect.width, data.texRect.height }
+					));
+				}
+
+				data.dirty = false;
+			}
+		}
+	}
+
+	void Runtime::drawLayers(sf::RenderTarget& target) const {
+		std::vector<std::pair<int, const sf::Sprite*>> sorted;
+		for (const auto& [id, data] : m_world.allLayers()) {
+			sf::Sprite* sprite = m_layers.at(id).get();
+			if (data.visible && sprite) {
+				sorted.emplace_back(data.order, sprite);
+			}
+		}
+		std::sort(sorted.begin(), sorted.end(), [](auto& a, auto& b) { return a.first < b.first; });
+
+		for (auto& [order, sprite] : sorted) {
+			target.draw(*sprite);
+		}
 	}
 
 	void Runtime::drawDialog(sf::RenderTarget& target) const {
@@ -194,13 +207,35 @@ namespace endeus {
 		target.draw(*m_contentText);
 	}
 
+	std::vector<sf::FloatRect> Runtime::computeOptionRects() const {
+		std::vector<sf::FloatRect> optionRects;
+
+		float optionW = 300;
+		float optionH = 50;
+		float spaceY = 30;
+
+		const auto& options = m_world.getChoiceOptions();
+		int n = options.size();
+		float startX = (static_cast<float>(m_window.getSize().x) - optionW) / 2;
+		float startY = (static_cast<float>(m_window.getSize().y) - optionH * n - spaceY * (n - 1)) / 2;
+
+		for (size_t i = 0; i < n; ++i) {
+			sf::FloatRect rect({ startX, startY + i * (optionH + 30) },
+							   { optionW, optionH });
+			optionRects.emplace_back(rect);
+		}
+		return optionRects;
+	}
+
 	void Runtime::drawChoices(sf::RenderTarget& target) const {
-		if (!m_choiceState.active) {
+		if (!m_world.hasChoice()) {
 			return;
 		}
 
-		for (size_t i = 0; i < m_choiceState.options.size(); ++i) {
-			const auto& rect = m_choiceState.optionRects[i];
+		const auto& optionRects = computeOptionRects();
+
+		for (size_t i = 0; i < optionRects.size(); ++i) {
+			const auto& rect = optionRects[i];
 			sf::RectangleShape box;
 			box.setSize(rect.size);
 			box.setPosition(rect.position);
@@ -210,11 +245,12 @@ namespace endeus {
 			target.draw(box);
 
 			sf::Text text(m_font);
-			text.setString(toSF(m_choiceState.options[i].text));
+			text.setString(toSF(m_world.getChoiceOptions()[i].text));
 			text.setCharacterSize(24);
 			text.setFillColor(sf::Color::White);
 			text.setPosition({ rect.position.x + 10, rect.position.y + 10 });
 			target.draw(text);
 		}
 	}
-}
+
+} // namespace endeus

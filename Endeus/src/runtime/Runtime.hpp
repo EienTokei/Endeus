@@ -2,6 +2,7 @@
 
 #include "IRuntime.hpp"
 #include "../event/EventBus.hpp"
+#include "WorldModel.hpp"
 
 #include <unordered_map>
 #include <SFML/Graphics.hpp>
@@ -18,7 +19,7 @@ namespace endeus {
 		bool execute(const Instruction& instr) override;
 		void update(float dt) override;
 
-		void draw(sf::RenderTarget& target) const;
+		void draw(sf::RenderTarget& target);
 
 	private:
 		void onMouseClick(sf::Vector2i pos);
@@ -30,35 +31,25 @@ namespace endeus {
 		void handleChoice(const Instruction::Choice& instr);
 		void handleWaitForClick();
 
+		void syncDirtyLayers();
+		void drawLayers(sf::RenderTarget& target) const;
 		void drawDialog(sf::RenderTarget& target) const;
+		std::vector<sf::FloatRect> computeOptionRects() const;
 		void drawChoices(sf::RenderTarget& target) const;
 
 	private:
-		struct Layer {
-			std::unique_ptr<sf::Sprite> sprite;
-			int order = 0;
-			bool visible = false;
-		};
 
+		WorldModel m_world;
 		EventBus& m_eventBus;
 		sf::RenderWindow& m_window;
 		std::unordered_map<std::string, std::unique_ptr<sf::Texture>> m_textures;	// textureKey -> Texture
+		std::unordered_map<std::string, std::unique_ptr<sf::Sprite>> m_layers;		// layerId -> Sprite
 		sf::Font m_font;
-		std::unordered_map<std::string, Layer> m_layers;	// layerId -> Layer
-
-		std::string m_speaker;
-		std::string m_content;
+		
 		mutable std::unique_ptr<sf::Text> m_speakerText;
 		mutable std::unique_ptr<sf::Text> m_contentText;
 
 		bool m_waitingForClick = false;
-
-		// 选项状态
-		struct ChoiceState {
-			bool active = false;
-			std::vector<Instruction::Choice::Option> options;
-			std::vector<sf::FloatRect> optionRects;
-		} m_choiceState;
 	};
 
 	inline sf::String toSF(const std::string str) {
