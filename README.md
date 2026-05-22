@@ -23,7 +23,7 @@ Endeus 是一个轻量级视觉小说引擎，使用 **C++20** 和 **SFML 3.0** 
 - [x] 内存泄漏检测（Debug 模式）
 - [x] 基础指令集架构
 - [x] 类型安全的事件总线
-- [x] 单元测试（GoogleTest，目前只覆盖基本指令和事件模块）
+- [x] 单元测试（GoogleTest，覆盖指令、事件总线及核心数据模型 WorldModel）
 
 ## 核心模块
 
@@ -40,6 +40,9 @@ Endeus 是一个轻量级视觉小说引擎，使用 **C++20** 和 **SFML 3.0** 
 
 - **Instruction（指令）**  
   所有脚本动作的静态描述。Director 逐条读取，同步指令由 Runtime 立即执行，异步指令则等待事件完成后再推进。
+
+- **WorldModel（世界模型）**  
+  纯数据模型，存储所有逻辑状态：图层（位置、透明度、可见性）、对话框文本、选项列表。与渲染逻辑分离，支持脏标记高效同步，并为动画系统和存档提供稳定接口。
 
 ## 构建与运行
 
@@ -60,7 +63,7 @@ cd Endeus
 
 2. 准备素材
 
-根据 `docs/ASSETS_REQUIRED.md` 中的要求，将图片和字体等放入 `Endeus/assets/`。
+根据 [`docs/ASSETS_REQUIRED.md`](docs/ASSETS_REQUIRED.md)  中的要求，将图片和字体等放入 `Endeus/assets/`。
 
 3. 构建
 
