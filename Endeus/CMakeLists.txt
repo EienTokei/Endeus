@@ -6,8 +6,15 @@
 find_package(SFML COMPONENTS Graphics Window System REQUIRED)
 
 # 将源代码添加到此项目的可执行文件。
-file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.hpp")
-add_executable(Endeus ${SRC_FILES})
+set(SOURCES
+    src/main.cpp
+    src/engine/Engine.cpp
+    src/runtime/Runtime.cpp
+    src/runtime/WorldModel.cpp
+    src/script/Director.cpp
+    # ... 其他源文件
+)
+add_executable(Endeus ${SOURCES})
 
 # 强制使用 C++20 标准
 set_target_properties(Endeus PROPERTIES
@@ -52,6 +59,7 @@ list(REMOVE_ITEM TEST_SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 add_executable(EndeusTests
     tests/test_instruction.cpp
     tests/test_event_bus.cpp
+    tests/test_world_model.cpp
     ${TEST_SRC_FILES}   # 直接包含业务源文件（不含 main）
 )
 
