@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../script/Instruction.hpp"
+#include "Instruction.hpp"
 
 namespace endeus {
 
-	class IRuntime {
+	class IExecutor {
 	public:
-		virtual ~IRuntime() = default;
+		virtual ~IExecutor() = default;
 
 		// 执行一条指令
 		virtual bool execute(const Instruction& instr) = 0;

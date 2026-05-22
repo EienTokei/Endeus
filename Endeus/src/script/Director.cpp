@@ -1,8 +1,8 @@
 #include "Director.hpp"
 
 namespace endeus {
-	Director::Director(IRuntime& runtime, EventBus& eventBus)
-		: m_runtime(runtime), m_eventBus(eventBus) {
+	Director::Director(IExecutor& executor, EventBus& eventBus)
+		: m_executor(executor), m_eventBus(eventBus) {
 		// 订阅事件
 		m_eventBus.subscribe<Event::ActionCompleted>([this](const Event& e) { onEvent(e); });
 		m_eventBus.subscribe<Event::ChoiceSelected>([this](const Event& e) { onEvent(e); });
@@ -25,7 +25,7 @@ namespace endeus {
 		if (m_finished) {
 			return;
 		}
-		m_runtime.update(dt);
+		m_executor.update(dt);
 		if (m_waiting) {
 			return;
 		}
@@ -51,7 +51,7 @@ namespace endeus {
 				m_finished = true;
 				break;
 			}
-			bool completed = m_runtime.execute(instr);
+			bool completed = m_executor.execute(instr);
 			if(completed) {
 				toNext();	// 同步 -> 继续循环, 执行下一条
 			}

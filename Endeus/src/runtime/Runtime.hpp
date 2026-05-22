@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IRuntime.hpp"
+#include "../script/IExecutor.hpp"
 #include "../event/EventBus.hpp"
 #include "WorldModel.hpp"
 
@@ -9,7 +9,7 @@
 
 namespace endeus {
 
-	class Runtime : public IRuntime {
+	class Runtime : public IExecutor {
 	public:
 		Runtime(EventBus& eventBus, sf::RenderWindow& window);
 

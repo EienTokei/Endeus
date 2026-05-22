@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Instruction.hpp"
-#include "../runtime/IRuntime.hpp"
+#include "IExecutor.hpp"
 #include "../event/EventBus.hpp"
 
 #include <unordered_map>
@@ -10,7 +10,7 @@ namespace endeus {
 
 	class Director {
 	public:
-		Director(IRuntime& runtime, EventBus& eventBus);
+		Director(IExecutor& executor, EventBus& eventBus);
 		void init(const std::vector<Instruction>& instructions);
 		void update(float dt);
 		bool isFinished() const;
@@ -22,7 +22,7 @@ namespace endeus {
 		void toLabel(const std::string& label);
 		void onEvent(const Event& e);
 
-		IRuntime& m_runtime;
+		IExecutor& m_executor;
 		EventBus& m_eventBus;
 		std::vector<Instruction> m_instructions;
 		std::unordered_map<std::string, size_t> m_labelMap;
