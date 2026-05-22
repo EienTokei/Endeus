@@ -8,6 +8,8 @@
 |--------|------|----------------|
 | bg_janus.png | 图片 | 1280×720 像素 |
 | door_sprite.png | 图片 | 582×540 像素 |
+| ev_reader.png | 图片 | 1280×720 像素 |
+| ev_writer.png | 图片 | 1280×720 像素 |
 | simkai.ttf | 字体 | TrueType/OpenType 字体文件 |
 
 ## 合法素材获取途径
