@@ -22,8 +22,10 @@ namespace endeus {
 			std::string layerId;
 			std::string textureKey;
 			Vec2f position;
+			float alpha;
 			int order;
 			Rect texRect;			///< 显示区域, 空表示整张纹理
+
 		};
 
 		/// 隐藏图层

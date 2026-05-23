@@ -72,7 +72,7 @@ namespace endeus {
 			return;
 		}
 
-		m_world.setLayer(instr.layerId, { instr.textureKey, instr.order, true, instr.position, 1.f , instr.texRect});
+		m_world.setLayer(instr.layerId, { instr.textureKey, instr.order, true, instr.position, instr.alpha , instr.texRect});
 	}
 
 	void Runtime::handleHideLayer(const Instruction::HideLayer& instr) {

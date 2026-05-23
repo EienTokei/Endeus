@@ -75,14 +75,14 @@ namespace endeus {
 		using Instr = Instruction;
 		m_script = {
 			// 初始画面
-			Instr(Instr::ShowLayer{"bg_janus", "bg_janus", {0,0}, 0, {}}),
+			Instr(Instr::ShowLayer{"bg_janus", "bg_janus", {0,0}, 1.f, 0, {}}),
 			Instr(Instr::SetSpeaker{"Endeus"}),
 			Instr(Instr::SetContent{"......", false}),
 			Instr(Instr::Wait{0.f, true}),     // 等待点击
 			Instr(Instr::SetContent{"............", false}),
 			Instr(Instr::Wait{0.f, true}),
 			Instr(Instr::Label{"restart"}),
-			Instr(Instr::ShowLayer{"door", "door_sprite", {600,200}, 1, {}}),
+			Instr(Instr::ShowLayer{"door", "door_sprite", {600,200}, 0.5f, 1, {}}),
 			Instr(Instr::SetContent{"写者借我构建故事。", false}),
 			Instr(Instr::Wait{0.f, true}),
 			Instr(Instr::SetContent{"读者借我踏入世界。", false}),
@@ -96,13 +96,13 @@ namespace endeus {
 			// 分支
 			Instr(Instr::Label{"writer"}),
 			Instr(Instr::HideLayer {"bg"}),
-			Instr(Instr::ShowLayer{"ev_writer", "ev_writer", {0,0}, 0, {}}),
+			Instr(Instr::ShowLayer{"ev_writer", "ev_writer", {0,0}, 1.f, 0, {}}),
 			Instr(Instr::SetContent{"你选择了写者。故事因你而生。", false}),
 			Instr(Instr::Wait{0.f, true}),
 			Instr(Instr::End{true}),
 			Instr(Instr::Label{"reader"}),
 			Instr(Instr::HideLayer {"bg"}),
-			Instr(Instr::ShowLayer{"ev_reader", "ev_reader", {0,0}, 0, {}}),
+			Instr(Instr::ShowLayer{"ev_reader", "ev_reader", {0,0}, 1.f, 0, {}}),
 			Instr(Instr::SetContent{"你选择了读者。世界因你而在。", false}),
 			Instr(Instr::Wait{0.f, true}),
 			Instr(Instr::End{true}),
