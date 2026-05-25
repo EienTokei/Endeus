@@ -12,8 +12,10 @@ set(SOURCES
     src/runtime/Runtime.cpp
     src/runtime/WorldModel.cpp
     src/script/Director.cpp
+    src/runtime/anemoi/Anemoi.cpp
     # ... 其他源文件
 )
+
 add_executable(Endeus ${SOURCES})
 
 # 强制使用 C++20 标准

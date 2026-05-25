@@ -1,4 +1,7 @@
 #include "Runtime.hpp"
+#include "anemoi/MoveLayerAnemos.hpp"
+
+#include <iostream>
 
 namespace endeus {
 
@@ -38,6 +41,10 @@ namespace endeus {
 			handleHideLayer(*hide);
 			return true;
 		}
+		if (auto* move = instr.getIf<Instruction::MoveLayer>()) {
+			handleMoveLayer(*move);
+			return true;	// 不阻塞 Director 调度
+		}
 		if (auto* speaker = instr.getIf<Instruction::SetSpeaker>()) {
 			handleSetSpeaker(*speaker);
 			return true;
@@ -63,8 +70,16 @@ namespace endeus {
 	}
 
 	void Runtime::update(float dt) {
-		// 暂不实现
+		if (m_anemoi.isPlaying()) {
+			m_anemoi.update(dt, m_world);
+		}
 	}
+
+	//void Runtime::resetAsync() {
+	//	m_anemoi.clear();
+	//	m_waitingForClick = false;
+	//	m_world.clearChoice();
+	//}
 
 	void Runtime::handleShowLayer(const Instruction::ShowLayer& instr) {
 		auto texIt = m_textures.find(instr.textureKey);
@@ -77,6 +92,21 @@ namespace endeus {
 
 	void Runtime::handleHideLayer(const Instruction::HideLayer& instr) {
 		m_world.hideLayer(instr.layerId);
+	}
+
+	void Runtime::handleMoveLayer(const Instruction::MoveLayer& instr) {
+		const LayerData* layer = m_world.getLayer(instr.layerId);
+		if (!layer) {
+			std::cerr << "move: no layer" << std::endl;
+			return;
+		}
+
+		auto anemos = std::make_unique<MoveLayerAnemos>(
+			instr.layerId,
+			instr.toPosition,
+			instr.durationSeconds
+		);
+		m_anemoi.add(std::move(anemos));
 	}
 
 	void Runtime::handleSetSpeaker(const Instruction::SetSpeaker& instr) {
@@ -92,6 +122,7 @@ namespace endeus {
 	void Runtime::handleChoice(const Instruction::Choice& instr) {
 		std::vector<ChoiceOption> options;
 		for (const auto& opt : instr.options) {
+			// 指令的选项与世界中的选项虽然结构相同但类型不同, 直接传递会导致C2672	“std::construct_at”: 未找到匹配的重载函数	
 			options.emplace_back(ChoiceOption{opt.text, opt.targetLabel});
 		}
 		m_world.setChoice(std::move(options));

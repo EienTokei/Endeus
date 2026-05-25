@@ -72,6 +72,8 @@ namespace endeus {
 	void Director::toLabel(const std::string& label) {
 		auto it = m_labelMap.find(label);
 		if (it != m_labelMap.end()) {
+			//m_executor.resetAsync();	// 统一清空旧异步活动, 避免旧动画残留, 虽然可能会导致选项前后略微的不连贯
+			// 不对, 本质应该还是动画的重复执行, 是否应该清空异步活动暂且保留
 			m_pc = it->second;
 		}
 		else {

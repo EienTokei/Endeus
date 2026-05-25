@@ -3,6 +3,7 @@
 #include "../script/IExecutor.hpp"
 #include "../event/EventBus.hpp"
 #include "WorldModel.hpp"
+#include "anemoi/Anemoi.hpp"
 
 #include <unordered_map>
 #include <SFML/Graphics.hpp>
@@ -18,6 +19,7 @@ namespace endeus {
 
 		bool execute(const Instruction& instr) override;
 		void update(float dt) override;
+		//void resetAsync() override;
 
 		void draw(sf::RenderTarget& target);
 
@@ -26,6 +28,7 @@ namespace endeus {
 
 		void handleShowLayer(const Instruction::ShowLayer& instr);
 		void handleHideLayer(const Instruction::HideLayer& instr);
+		void handleMoveLayer(const Instruction::MoveLayer& instr);
 		void handleSetSpeaker(const Instruction::SetSpeaker& instr);
 		void handleSetContent(const Instruction::SetContent& instr);
 		void handleChoice(const Instruction::Choice& instr);
@@ -40,6 +43,7 @@ namespace endeus {
 	private:
 
 		WorldModel m_world;
+		Anemoi m_anemoi;
 		EventBus& m_eventBus;
 		sf::RenderWindow& m_window;
 		std::unordered_map<std::string, std::unique_ptr<sf::Texture>> m_textures;	// textureKey -> Texture
