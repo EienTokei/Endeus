@@ -26,13 +26,14 @@ namespace endeus {
 	private:
 		void onMouseClick(sf::Vector2i pos);
 
-		void handleShowLayer(const Instruction::ShowLayer& instr);
-		void handleHideLayer(const Instruction::HideLayer& instr);
-		void handleMoveLayer(const Instruction::MoveLayer& instr);
-		void handleSetSpeaker(const Instruction::SetSpeaker& instr);
-		void handleSetContent(const Instruction::SetContent& instr);
-		void handleChoice(const Instruction::Choice& instr);
-		void handleWaitForClick();
+		// true - 同步完成; false - 需要等待
+		bool handleShowLayer(const Instruction::ShowLayer& instr);
+		bool handleHideLayer(const Instruction::HideLayer& instr);
+		bool handleMoveLayer(const Instruction::MoveLayer& instr);
+		bool handleSetSpeaker(const Instruction::SetSpeaker& instr);
+		bool handleSetContent(const Instruction::SetContent& instr);
+		bool handleChoice(const Instruction::Choice& instr);
+		bool handleWaitForClick();
 
 		void syncDirtyLayers();
 		void drawLayers(sf::RenderTarget& target) const;

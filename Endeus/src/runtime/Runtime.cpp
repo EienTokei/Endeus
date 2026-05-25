@@ -34,33 +34,26 @@ namespace endeus {
 
 	bool Runtime::execute(const Instruction& instr) {
 		if (auto* show = instr.getIf<Instruction::ShowLayer>()) {
-			handleShowLayer(*show);
-			return true;
+			return handleShowLayer(*show);
 		}
 		if (auto* hide = instr.getIf<Instruction::HideLayer>()) {
-			handleHideLayer(*hide);
-			return true;
+			return handleHideLayer(*hide);
 		}
 		if (auto* move = instr.getIf<Instruction::MoveLayer>()) {
-			handleMoveLayer(*move);
-			return true;	// 不阻塞 Director 调度
+			return handleMoveLayer(*move);	// 不阻塞 Director 调度, 继续推进剧情
 		}
 		if (auto* speaker = instr.getIf<Instruction::SetSpeaker>()) {
-			handleSetSpeaker(*speaker);
-			return true;
+			return handleSetSpeaker(*speaker);
 		}
 		if (auto* content = instr.getIf<Instruction::SetContent>()) {
-			handleSetContent(*content);
-			return true;
+			return handleSetContent(*content);
 		}
 		if (auto* choice = instr.getIf<Instruction::Choice>()) {
-			handleChoice(*choice);
-			return false;
+			return handleChoice(*choice);
 		}
 		if (auto* wait = instr.getIf<Instruction::Wait>()) {
 			if (wait->seconds == 0.f) {
-				handleWaitForClick();
-				return false;
+				return handleWaitForClick();
 			}
 			// 暂不实现
 			return true;
@@ -81,24 +74,27 @@ namespace endeus {
 	//	m_world.clearChoice();
 	//}
 
-	void Runtime::handleShowLayer(const Instruction::ShowLayer& instr) {
+	bool Runtime::handleShowLayer(const Instruction::ShowLayer& instr) {
 		auto texIt = m_textures.find(instr.textureKey);
 		if (texIt == m_textures.end()) {
-			return;
+			std::cerr << "show: no texture - " << instr.textureKey << std::endl;
+			return true;
 		}
 
 		m_world.setLayer(instr.layerId, { instr.textureKey, instr.order, true, instr.position, instr.alpha , instr.texRect});
+		return true;
 	}
 
-	void Runtime::handleHideLayer(const Instruction::HideLayer& instr) {
+	bool Runtime::handleHideLayer(const Instruction::HideLayer& instr) {
 		m_world.hideLayer(instr.layerId);
+		return true;
 	}
 
-	void Runtime::handleMoveLayer(const Instruction::MoveLayer& instr) {
+	bool Runtime::handleMoveLayer(const Instruction::MoveLayer& instr) {
 		const LayerData* layer = m_world.getLayer(instr.layerId);
 		if (!layer) {
-			std::cerr << "move: no layer" << std::endl;
-			return;
+			std::cerr << "move: no layer - " << instr.layerId << std::endl;
+			return true;
 		}
 
 		auto anemos = std::make_unique<MoveLayerAnemos>(
@@ -107,29 +103,34 @@ namespace endeus {
 			instr.durationSeconds
 		);
 		m_anemoi.add(std::move(anemos));
+		return true;
 	}
 
-	void Runtime::handleSetSpeaker(const Instruction::SetSpeaker& instr) {
+	bool Runtime::handleSetSpeaker(const Instruction::SetSpeaker& instr) {
 		m_world.setSpeaker(instr.name);
 		m_speakerText->setString(toSF(m_world.getSpeaker()));
+		return true;
 	}
 
-	void Runtime::handleSetContent(const Instruction::SetContent& instr) {
+	bool Runtime::handleSetContent(const Instruction::SetContent& instr) {
 		m_world.setContent(instr.content, instr.append);
 		m_contentText->setString(toSF(m_world.getContent()));
+		return true;
 	}
 
-	void Runtime::handleChoice(const Instruction::Choice& instr) {
+	bool Runtime::handleChoice(const Instruction::Choice& instr) {
 		std::vector<ChoiceOption> options;
 		for (const auto& opt : instr.options) {
 			// 指令的选项与世界中的选项虽然结构相同但类型不同, 直接传递会导致C2672	“std::construct_at”: 未找到匹配的重载函数	
 			options.emplace_back(ChoiceOption{opt.text, opt.targetLabel});
 		}
 		m_world.setChoice(std::move(options));
+		return false;
 	}
 
-	void Runtime::handleWaitForClick() {
+	bool Runtime::handleWaitForClick() {
 		m_waitingForClick = true;
+		return false;
 	}
 
 	void Runtime::onMouseClick(sf::Vector2i pos) {
