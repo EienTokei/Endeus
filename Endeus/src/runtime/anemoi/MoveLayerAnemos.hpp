@@ -21,9 +21,8 @@ namespace endeus {
 				}
 			}
 			m_elapsed += dt;
-			float t = std::min(1.0f, m_elapsed / m_duration);	// 0~1
-			Vec2f newPos = m_from + (m_to - m_from) * t;
-			world.setLayerPosition(m_layerId, newPos);
+			float t = interp::normalize(m_elapsed, m_duration);
+			world.setLayerPosition(m_layerId, interp::lerp<Vec2f>(m_from, m_to, t));
 			return m_elapsed >= m_duration;
 		}
 

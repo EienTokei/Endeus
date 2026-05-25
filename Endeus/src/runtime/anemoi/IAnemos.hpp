@@ -2,6 +2,7 @@
 
 #include "../WorldModel.hpp"
 #include "AnemosTypes.hpp"
+#include "../../utils/Interpolate.hpp"	// 插值函数头文件, 传递依赖, 避免在每个子类包含
 
 namespace endeus {
 
