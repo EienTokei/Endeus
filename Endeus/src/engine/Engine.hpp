@@ -48,7 +48,7 @@ namespace endeus {
 		sf::RenderWindow m_window;
 		EventBus m_eventBus;
 		Runtime m_runtime;
-		Director m_executor;
+		Director m_director;
 		std::vector<Instruction> m_script;
 	};
 

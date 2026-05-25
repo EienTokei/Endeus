@@ -3,11 +3,11 @@
 namespace endeus {
 
 	Engine::Engine() : m_window(sf::VideoMode({ 1280, 720 }), "Endeus - The Janus Door within EnD.C")
-		, m_runtime(m_eventBus, m_window), m_executor(m_runtime, m_eventBus) {
+		, m_runtime(m_eventBus, m_window), m_director(m_runtime, m_eventBus) {
 		m_window.setFramerateLimit(60);   // 限制 60 FPS
 		loadAssets();
 		buildScripts();
-		m_executor.init(m_script);
+		m_director.init(m_script);
 	}
 
 	void Engine::run() {
@@ -15,11 +15,11 @@ namespace endeus {
 		while (m_window.isOpen()) {
 			processEvents();
 			float dt = clock.restart().asSeconds();		// 重置起始点为当前时刻，并返回重置前经过的时间
-			m_executor.update(dt);
+			m_director.update(dt);
 			m_window.clear(sf::Color::Black);			// 黑色填充后备缓冲区
 			m_runtime.draw(m_window);					// 绘制到后备缓冲区
 			m_window.display();							// 交换前后缓冲区 ( SFML 采用双缓冲技术)
-			if (m_executor.isFinished()) {
+			if (m_director.isFinished()) {
 				m_window.close();
 			}
 		}
