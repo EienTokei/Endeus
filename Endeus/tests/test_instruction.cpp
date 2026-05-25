@@ -4,7 +4,7 @@
 using namespace endeus;
 
 TEST(InstructionTest, ShowLayerTypeAndFields) {
-    Instruction::ShowLayer show{ "bg", "bg_janus", {100, 200}, 1, {0,0,400,300} };
+    Instruction::ShowLayer show{ "bg", "bg_janus", {100, 200}, 1.f, 0, {0,0,400,300} };
     Instruction instr(show);
 
     EXPECT_TRUE(instr.is<Instruction::ShowLayer>());
@@ -16,7 +16,8 @@ TEST(InstructionTest, ShowLayerTypeAndFields) {
     EXPECT_EQ(ptr->textureKey, "bg_janus");
     EXPECT_FLOAT_EQ(ptr->position.x, 100);
     EXPECT_FLOAT_EQ(ptr->position.y, 200);
-    EXPECT_EQ(ptr->order, 1);
+    EXPECT_EQ(ptr->alpha, 1.f);
+    EXPECT_EQ(ptr->order, 0);
     EXPECT_EQ(ptr->texRect.width, 400);
 }
 

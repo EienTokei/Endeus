@@ -72,8 +72,8 @@ namespace endeus {
 		bool modifyLayer(const std::string& id, Func&& updater) {
 			auto it = m_layers.find(id);
 			if (it == m_layers.end()) return false;
-			updater(it->second);
-			it->second.dirty = true;
+			bool changed = updater(it->second);
+			if (changed) it->second.dirty = true;
 			return true;
 		}
 	};

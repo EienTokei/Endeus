@@ -12,16 +12,32 @@ namespace endeus {
 	}
 
 	bool WorldModel::setLayerData(const std::string& id, const LayerData& data) {
-		return modifyLayer(id, [&](LayerData& m_data) { m_data = data; });
+		return modifyLayer(id, [&](LayerData& m_data) -> bool { 
+			if (m_data == data) return false;	// false 表示 unchanged
+			m_data = data;
+			return true;
+		});
 	}
 	bool WorldModel::setLayerPosition(const std::string& id, Vec2f pos) {
-		return modifyLayer(id, [&](LayerData& data) { data.position = pos; });
+		return modifyLayer(id, [&](LayerData& data) { 
+			if (data.position == pos) return false;
+			data.position = pos; 
+			return true;
+		});
 	}
 	bool WorldModel::setLayerAlpha(const std::string& id, float alpha) {
-		return modifyLayer(id, [&](LayerData& data) { data.alpha = alpha; });
+		return modifyLayer(id, [&](LayerData& data) {
+			if (data.alpha == alpha) return false;
+			data.alpha = alpha;
+			return true;
+		});
 	}
 	bool WorldModel::setLayerVisible(const std::string& id, bool visible) {
-		return modifyLayer(id, [&](LayerData& data) { data.visible = visible; });
+		return modifyLayer(id, [&](LayerData& data) {
+			if (data.visible == visible) return false;
+			data.visible = visible;
+			return true;
+		});
 	}
 
 	//void WorldModel::removeLayer(const std::string& id) {
