@@ -40,11 +40,16 @@ namespace endeus {
 
 	class WorldModel {
 	public:
-		void setLayer(const std::string& id, const LayerData& data);
-		void hideLayer(const std::string& id);
+		bool addLayer(const std::string& id, const LayerData& data);
 		//void removeLayer(const std::string& id);
 		const LayerData* getLayer(const std::string& id) const;
 		const std::unordered_map<std::string, LayerData>& allLayers() const;
+
+		// 修改图层专用接口
+		bool setLayerData(const std::string& id, const LayerData& data);
+		bool setLayerPosition(const std::string& id, Vec2f pos);
+		bool setLayerAlpha(const std::string& id, float alpha);
+		bool setLayerVisible(const std::string& id, bool visible);
 
 		void setSpeaker(const std::string& name);
 		void setContent(const std::string& text, bool append);
@@ -61,6 +66,16 @@ namespace endeus {
 		std::string m_speaker;
 		std::string m_content;
 		std::vector<ChoiceOption> m_choiceOptions;
+
+		// 内部通用修改器
+		template <typename Func>
+		bool modifyLayer(const std::string& id, Func&& updater) {
+			auto it = m_layers.find(id);
+			if (it == m_layers.end()) return false;
+			updater(it->second);
+			it->second.dirty = true;
+			return true;
+		}
 	};
 
 } // namespace endeus

@@ -1,22 +1,27 @@
 #include "WorldModel.hpp"
 
 namespace endeus {
-	void WorldModel::setLayer(const std::string& id, const LayerData& data) {
+	bool WorldModel::addLayer(const std::string& id, const LayerData& data) {
 		auto it = m_layers.find(id);
-		if (it != m_layers.end() && it->second == data) {
-			// 数据相同，无需标记脏
-			return;
+		if (it != m_layers.end()) {
+			return false;
 		}
 		m_layers[id] = data;
 		m_layers[id].dirty = true;
+		return true;
 	}
 
-	void WorldModel::hideLayer(const std::string& id) {
-		auto it = m_layers.find(id);
-		if (it != m_layers.end()) {
-			it->second.visible = false;
-			it->second.dirty = true;
-		}
+	bool WorldModel::setLayerData(const std::string& id, const LayerData& data) {
+		return modifyLayer(id, [&](LayerData& m_data) { m_data = data; });
+	}
+	bool WorldModel::setLayerPosition(const std::string& id, Vec2f pos) {
+		return modifyLayer(id, [&](LayerData& data) { data.position = pos; });
+	}
+	bool WorldModel::setLayerAlpha(const std::string& id, float alpha) {
+		return modifyLayer(id, [&](LayerData& data) { data.alpha = alpha; });
+	}
+	bool WorldModel::setLayerVisible(const std::string& id, bool visible) {
+		return modifyLayer(id, [&](LayerData& data) { data.visible = visible; });
 	}
 
 	//void WorldModel::removeLayer(const std::string& id) {

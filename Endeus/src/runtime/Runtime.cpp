@@ -80,13 +80,16 @@ namespace endeus {
 			std::cerr << "show: no texture - " << instr.textureKey << std::endl;
 			return true;
 		}
+		LayerData data{ instr.textureKey, instr.order, true, instr.position, instr.alpha , instr.texRect };
 
-		m_world.setLayer(instr.layerId, { instr.textureKey, instr.order, true, instr.position, instr.alpha , instr.texRect});
+		if (!m_world.addLayer(instr.layerId, data)) {
+			m_world.setLayerData(instr.layerId, data);
+		}
 		return true;
 	}
 
 	bool Runtime::handleHideLayer(const Instruction::HideLayer& instr) {
-		m_world.hideLayer(instr.layerId);
+		m_world.setLayerVisible(instr.layerId, false);
 		return true;
 	}
 
@@ -170,6 +173,7 @@ namespace endeus {
 				auto texIt = m_textures.find(data.textureKey);
 				if (texIt == m_textures.end()) {
 					// 纹理不存在，跳过
+					std::cerr << "sync: no texture - " << data.textureKey << std::endl;
 					data.dirty = false;
 					continue;
 				}

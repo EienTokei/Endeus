@@ -23,18 +23,12 @@ namespace endeus {
 			m_elapsed += dt;
 			float t = std::min(1.0f, m_elapsed / m_duration);	// 0~1
 			Vec2f newPos = m_from + (m_to - m_from) * t;
-			if (auto* layer = const_cast<LayerData*>(world.getLayer(m_layerId))) {
-				layer->position = newPos;
-				layer->dirty = true;
-			}
+			world.setLayerPosition(m_layerId, newPos);
 			return m_elapsed >= m_duration;
 		}
 
 		void skip(WorldModel& world) override {
-			if (auto* layer = const_cast<LayerData*>(world.getLayer(m_layerId))) {
-				layer->position = m_to;
-				layer->dirty = true;
-			}
+			world.setLayerPosition(m_layerId, m_to);
 			m_elapsed = m_duration;
 		}
 
