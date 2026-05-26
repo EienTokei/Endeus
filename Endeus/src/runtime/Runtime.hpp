@@ -56,6 +56,8 @@ namespace endeus {
 		mutable std::unique_ptr<sf::Text> m_contentText;
 
 		bool m_waitingForClick = false;
+
+		std::vector<Instruction::Choice::Option> m_options;
 	};
 
 	inline sf::String toSF(const std::string str) {

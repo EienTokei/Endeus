@@ -33,11 +33,6 @@ namespace endeus {
 		}
 	};
 
-	struct ChoiceOption {
-		std::string text;
-		std::string targetLabel;
-	};
-
 	class WorldModel {
 	public:
 		bool addLayer(const std::string& id, const LayerData& data);
@@ -56,16 +51,10 @@ namespace endeus {
 		std::string getSpeaker() const;
 		std::string getContent() const;
 
-		void setChoice(const std::vector<ChoiceOption>& options);
-		void clearChoice();
-		bool hasChoice() const;
-		const std::vector<ChoiceOption>& getChoiceOptions() const;
-
 	private:
 		std::unordered_map<std::string, LayerData> m_layers;		// layerId -> LayerData
 		std::string m_speaker;
 		std::string m_content;
-		std::vector<ChoiceOption> m_choiceOptions;
 
 		// 内部通用修改器
 		template <typename Func>

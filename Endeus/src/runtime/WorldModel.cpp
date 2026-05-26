@@ -77,20 +77,4 @@ namespace endeus {
 		return m_content;
 	}
 
-	void WorldModel::setChoice(const std::vector<ChoiceOption>& options) {
-		m_choiceOptions = options;
-	}
-
-	void WorldModel::clearChoice() {
-		m_choiceOptions.clear();
-	}
-
-	bool WorldModel::hasChoice() const {
-		return !m_choiceOptions.empty();
-	}
-
-	const std::vector<ChoiceOption>& WorldModel::getChoiceOptions() const {
-		return m_choiceOptions;
-	}
-
 } // namespace endeus

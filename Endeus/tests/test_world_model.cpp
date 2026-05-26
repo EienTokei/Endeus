@@ -120,18 +120,6 @@ TEST(WorldModelTest, SpeakerAndContent) {
     EXPECT_EQ(model.getContent(), "Ciallo world");
 }
 
-TEST(WorldModelTest, ChoiceManagement) {
-    WorldModel model;
-    std::vector<ChoiceOption> opts = { {"Yes", "label_yes"}, {"No", "label_no"} };
-    model.setChoice(opts);
-    EXPECT_TRUE(model.hasChoice());
-    EXPECT_EQ(model.getChoiceOptions().size(), 2);
-
-    model.clearChoice();
-    EXPECT_FALSE(model.hasChoice());
-    EXPECT_TRUE(model.getChoiceOptions().empty());
-}
-
 TEST(WorldModelTest, GetNonExistentLayerReturnsNull) {
     WorldModel model;
     EXPECT_EQ(model.getLayer("not_exist"), nullptr);

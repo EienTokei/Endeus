@@ -71,7 +71,7 @@ namespace endeus {
 	void Runtime::resetAsync() {
 		m_anemoi.resetAll(m_world);
 		m_waitingForClick = false;
-		m_world.clearChoice();
+		m_options.clear();
 	}
 
 	bool Runtime::handleShowLayer(const Instruction::ShowLayer& instr) {
@@ -138,12 +138,7 @@ namespace endeus {
 	}
 
 	bool Runtime::handleChoice(const Instruction::Choice& instr) {
-		std::vector<ChoiceOption> options;
-		for (const auto& opt : instr.options) {
-			// 指令的选项与世界中的选项虽然结构相同但类型不同, 直接传递会导致C2672	“std::construct_at”: 未找到匹配的重载函数	
-			options.emplace_back(ChoiceOption{opt.text, opt.targetLabel});
-		}
-		m_world.setChoice(std::move(options));
+		m_options = instr.options;
 		return false;
 	}
 
@@ -154,14 +149,14 @@ namespace endeus {
 
 	void Runtime::onMouseClick(sf::Vector2i pos) {
 		// 优先级：选项 > 等待点击
-		if (m_world.hasChoice()) {
+		if (!m_options.empty()) {
 			sf::Vector2f fpos(static_cast<float>(pos.x), static_cast<float>(pos.y));
 			const auto& optionRects = computeOptionRects();
 			for (size_t i = 0; i < optionRects.size(); ++i) {
 				if (optionRects[i].contains(fpos)) {
 					// 选中选项
-					std::string target = m_world.getChoiceOptions()[i].targetLabel;
-					m_world.clearChoice();
+					std::string target = m_options[i].targetLabel;
+					m_options.clear();
 					m_eventBus.publish(Event::ChoiceSelected{ target });	// 发布选中事件
 					return;
 				}
@@ -266,8 +261,7 @@ namespace endeus {
 		float optionH = 50;
 		float spaceY = 30;
 
-		const auto& options = m_world.getChoiceOptions();
-		int n = options.size();
+		int n = m_options.size();
 		float startX = (static_cast<float>(m_window.getSize().x) - optionW) / 2;
 		float startY = (static_cast<float>(m_window.getSize().y) - optionH * n - spaceY * (n - 1)) / 2;
 
@@ -280,7 +274,7 @@ namespace endeus {
 	}
 
 	void Runtime::drawChoices(sf::RenderTarget& target) const {
-		if (!m_world.hasChoice()) {
+		if (m_options.empty()) {
 			return;
 		}
 
@@ -297,7 +291,7 @@ namespace endeus {
 			target.draw(box);
 
 			sf::Text text(m_font);
-			text.setString(toSF(m_world.getChoiceOptions()[i].text));
+			text.setString(toSF(m_options[i].text));
 			text.setCharacterSize(24);
 			text.setFillColor(sf::Color::White);
 			text.setPosition({ rect.position.x + 10, rect.position.y + 10 });
