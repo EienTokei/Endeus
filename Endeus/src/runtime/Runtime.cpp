@@ -1,5 +1,6 @@
 #include "Runtime.hpp"
 #include "anemoi/MoveLayerAnemos.hpp"
+#include "anemoi/FadeLayerAnemos.hpp"
 
 #include <iostream>
 
@@ -41,6 +42,9 @@ namespace endeus {
 		}
 		if (auto* move = instr.getIf<Instruction::MoveLayer>()) {
 			return handleMoveLayer(*move);	// 不阻塞 Director 调度, 继续推进剧情
+		}
+		if (auto* fade = instr.getIf<Instruction::FadeLayer>()) {
+			return handleFadeLayer(*fade);	// 不阻塞 Director 调度, 继续推进剧情
 		}
 		if (auto* speaker = instr.getIf<Instruction::SetSpeaker>()) {
 			return handleSetSpeaker(*speaker);
@@ -103,6 +107,22 @@ namespace endeus {
 		auto anemos = std::make_unique<MoveLayerAnemos>(
 			instr.layerId,
 			instr.toPosition,
+			instr.durationSeconds
+		);
+		m_anemoi.add(std::move(anemos));
+		return true;
+	}
+
+	bool Runtime::handleFadeLayer(const Instruction::FadeLayer& instr) {
+		const LayerData* layer = m_world.getLayer(instr.layerId);
+		if (!layer) {
+			std::cerr << "move: no layer - " << instr.layerId << std::endl;
+			return true;
+		}
+
+		auto anemos = std::make_unique<FadeLayerAnemos>(
+			instr.layerId,
+			instr.toAlpha,
 			instr.durationSeconds
 		);
 		m_anemoi.add(std::move(anemos));

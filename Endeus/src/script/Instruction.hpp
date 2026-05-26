@@ -43,7 +43,7 @@ namespace endeus {
 		/// 淡变图层透明度
 		struct FadeLayer {
 			std::string layerId;
-			int toAlpha;                ///< 0~255
+			float toAlpha;                ///< 0~255
 			float durationSeconds;
 		};
 
@@ -140,6 +140,7 @@ namespace endeus {
 			ShowLayer,
 			HideLayer,
 			MoveLayer,
+			FadeLayer,
 			SetSpeaker,
 			SetContent,
 			Choice,

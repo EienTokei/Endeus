@@ -30,6 +30,7 @@ namespace endeus {
 		bool handleShowLayer(const Instruction::ShowLayer& instr);
 		bool handleHideLayer(const Instruction::HideLayer& instr);
 		bool handleMoveLayer(const Instruction::MoveLayer& instr);
+		bool handleFadeLayer(const Instruction::FadeLayer& instr);
 		bool handleSetSpeaker(const Instruction::SetSpeaker& instr);
 		bool handleSetContent(const Instruction::SetContent& instr);
 		bool handleChoice(const Instruction::Choice& instr);

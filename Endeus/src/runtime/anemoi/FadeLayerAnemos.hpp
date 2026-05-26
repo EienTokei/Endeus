@@ -4,15 +4,15 @@
 
 namespace endeus {
 
-	class MoveLayerAnemos : public IAnemos {
+	class FadeLayerAnemos : public IAnemos {
 	public:
-		MoveLayerAnemos(std::string layerId, Vec2f to, float duration) 
+		FadeLayerAnemos(std::string layerId, float to, float duration)
 			: m_layerId(std::move(layerId)), m_to(to), m_duration(duration), m_elapsed(0.f) {}
 
 		bool update(float dt, WorldModel& world) override {
 			if (!m_initialized) {
 				if (auto* layer = world.getLayer(m_layerId)) {
-					m_from = layer->position;
+					m_from = layer->alpha;
 					m_initialized = true;
 				}
 				else {
@@ -21,23 +21,23 @@ namespace endeus {
 			}
 			m_elapsed += dt;
 			float t = interp::normalize(m_elapsed, m_duration);
-			world.setLayerPosition(m_layerId, interp::lerp<Vec2f>(m_from, m_to, t));
+			world.setLayerAlpha(m_layerId, interp::lerp<float>(m_from, m_to, t));
 			return m_elapsed >= m_duration;
 		}
 
 		void skip(WorldModel& world) override {
-			world.setLayerPosition(m_layerId, m_to);
+			world.setLayerAlpha(m_layerId, m_to);
 			m_elapsed = m_duration;
 		}
 
 		AnemosKey getKey() const override {
-			return { m_layerId, AnemosKey::Property::Position };
+			return { m_layerId, AnemosKey::Property::Alpha };
 		}
 
 	private:
 		bool m_initialized = false;
 		std::string m_layerId;
-		Vec2f m_from, m_to;
+		float m_from, m_to;
 		float m_duration, m_elapsed;
 	};
 }
