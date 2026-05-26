@@ -21,6 +21,8 @@ namespace endeus {
 
 		void skipAll(WorldModel& world);
 
+		void resetAll(WorldModel& world);
+
 		bool isPlaying() const;
 
 		void clear();

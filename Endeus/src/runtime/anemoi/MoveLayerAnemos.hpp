@@ -30,6 +30,14 @@ namespace endeus {
 			m_elapsed = m_duration;
 		}
 
+		void reset(WorldModel& world) override {
+			if (!m_initialized) {
+				return;
+			}
+			world.setLayerPosition(m_layerId, m_from);
+			m_elapsed = 0;
+		}
+
 		AnemosKey getKey() const override {
 			return { m_layerId, AnemosKey::Property::Position };
 		}

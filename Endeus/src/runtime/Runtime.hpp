@@ -19,7 +19,7 @@ namespace endeus {
 
 		bool execute(const Instruction& instr) override;
 		void update(float dt) override;
-		//void resetAsync() override;
+		void resetAsync() override;
 
 		void draw(sf::RenderTarget& target);
 

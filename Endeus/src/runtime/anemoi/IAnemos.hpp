@@ -18,6 +18,8 @@ namespace endeus {
 
 		virtual void skip(WorldModel& world) = 0;
 
+		virtual void reset(WorldModel& world) = 0;
+
 		virtual AnemosKey getKey() const = 0;
 	};
 

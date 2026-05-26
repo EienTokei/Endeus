@@ -15,7 +15,7 @@ namespace endeus {
 		virtual void update(float dt) = 0;
 
 		// 清空异步活动
-		//virtual void resetAsync() = 0;
+		virtual void resetAsync() = 0;
 	};
 
 } // namespace endeus

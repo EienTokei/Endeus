@@ -72,11 +72,11 @@ namespace endeus {
 		}
 	}
 
-	//void Runtime::resetAsync() {
-	//	m_anemoi.clear();
-	//	m_waitingForClick = false;
-	//	m_world.clearChoice();
-	//}
+	void Runtime::resetAsync() {
+		m_anemoi.resetAll(m_world);
+		m_waitingForClick = false;
+		m_world.clearChoice();
+	}
 
 	bool Runtime::handleShowLayer(const Instruction::ShowLayer& instr) {
 		auto texIt = m_textures.find(instr.textureKey);

@@ -23,6 +23,13 @@ namespace endeus {
 		clear();
 	}
 
+	void Anemoi::resetAll(WorldModel& world) {
+		for (auto& [_, anemos] : m_anemosMap) {
+			anemos->reset(world);
+		}
+		clear();
+	}
+
 	bool Anemoi::isPlaying() const {
 		return !m_anemosMap.empty();
 	}
