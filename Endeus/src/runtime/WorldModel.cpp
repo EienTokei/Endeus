@@ -77,4 +77,12 @@ namespace endeus {
 		return m_content;
 	}
 
+	WorldModel WorldModel::mirror() const {
+		WorldModel another;
+		another.m_content = m_content;
+		another.m_layers = m_layers;
+		another.m_speaker = m_speaker;
+		return another;
+	}
+
 } // namespace endeus

@@ -125,5 +125,28 @@ TEST(WorldModelTest, GetNonExistentLayerReturnsNull) {
     EXPECT_EQ(model.getLayer("not_exist"), nullptr);
 }
 
+TEST(WorldModelTest, MirrorCreatesDeepCopy) {
+    WorldModel original;
+    LayerData data{ "bg", 1, true, {10,20}, 0.8f, {0,0,100,100} };
+    original.addLayer("bg", data);
+    original.setSpeaker("Alice");
+    original.setContent("Hello", false);
+
+    WorldModel copy = original.mirror();
+
+    // 修改原模型，不应影响拷贝
+    original.setLayerPosition("bg", { 99,99 });
+    original.setSpeaker("Bob");
+    original.setContent("World", false);
+
+    const auto* layerCopy = copy.getLayer("bg");
+    ASSERT_NE(layerCopy, nullptr);
+    EXPECT_EQ(layerCopy->position.x, 10);
+    EXPECT_EQ(layerCopy->position.y, 20);
+    EXPECT_EQ(layerCopy->alpha, 0.8f);
+    EXPECT_EQ(copy.getSpeaker(), "Alice");
+    EXPECT_EQ(copy.getContent(), "Hello");
+}
+
 // 注：关于 dirty 标志的测试比较敏感，因为 dirty 是供 Runtime 使用的内部标志。
 // 如果将来需要测试脏标记行为，最好通过集成测试（创建 Runtime 并检查渲染同步）完成。

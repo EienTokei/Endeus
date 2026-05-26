@@ -51,6 +51,9 @@ namespace endeus {
 		std::string getSpeaker() const;
 		std::string getContent() const;
 
+		// 另一个世界
+		WorldModel mirror() const;
+
 	private:
 		std::unordered_map<std::string, LayerData> m_layers;		// layerId -> LayerData
 		std::string m_speaker;
