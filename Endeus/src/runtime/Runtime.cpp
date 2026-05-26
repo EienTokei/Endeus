@@ -180,22 +180,23 @@ namespace endeus {
 
 	void Runtime::syncDirtyLayers() {
 		for (auto& [id, data] : m_world.allLayers()) {
-			if (data.dirty) {
-				auto texIt = m_textures.find(data.textureKey);
-				if (texIt == m_textures.end()) {
-					// 纹理不存在，跳过
-					std::cerr << "sync: no texture - " << data.textureKey << std::endl;
-					data.dirty = false;
-					continue;
-				}
+			auto texIt = m_textures.find(data.textureKey);		// 1. 查找纹理
+			if (texIt == m_textures.end()) {
+				// 纹理不存在，跳过
+				std::cerr << "sync: no texture - " << data.textureKey << std::endl;
+				data.dirty = false;
+				continue;
+			}
 
-				auto spriteIt = m_layers.find(id);
-				if (spriteIt == m_layers.end()) {
-					// 创建新 Sprite
-					auto sprite = std::make_unique<sf::Sprite>(*texIt->second);
-					m_layers[id] = std::move(sprite);
-				}
+			auto spriteIt = m_layers.find(id);					// 2. 是否存在缓存
+			bool needCreate = (spriteIt == m_layers.end());
+			if (needCreate) {
+				// 创建新 Sprite
+				auto sprite = std::make_unique<sf::Sprite>(*texIt->second);
+				m_layers[id] = std::move(sprite);
+			}
 
+			if (needCreate || data.dirty) {						// 3. 设置属性
 				// 更新 Sprite 的属性
 				sf::Sprite* sprite = m_layers[id].get();
 				// 纹理改变
