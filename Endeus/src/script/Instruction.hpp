@@ -81,10 +81,8 @@ namespace endeus {
 			bool closeWindow = true;
 		};
 
-		struct Wait {
-			float seconds = 0.f;		///< 0=等待
-			bool skippable = true;		///< 是否允许跳过
-		};
+		/// 等待点击
+		struct Wait {};
 
 		/// 标签
 		struct Label {

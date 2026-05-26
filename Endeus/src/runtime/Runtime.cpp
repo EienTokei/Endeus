@@ -56,11 +56,7 @@ namespace endeus {
 			return handleChoice(*choice);
 		}
 		if (auto* wait = instr.getIf<Instruction::Wait>()) {
-			if (wait->seconds == 0.f) {
-				return handleWaitForClick();
-			}
-			// 暂不实现
-			return true;
+			return handleWaitForClick();
 		}
 		// 暂不实现
 		return true;
