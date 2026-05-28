@@ -25,31 +25,36 @@ Endeus 是一个轻量级视觉小说引擎，使用 **C++20** 和 **SFML 3.0** 
 - [x] 类型安全的事件总线
 - [x] 图层移动动画（非阻塞，MoveLayer 指令）
 - [x] 动画系统架构（Anemoi，支持按图层属性管理动画）
-- [x] 数据模型与渲染分离（WorldModel + 脏标记）
+- [x] 数据模型与渲染完全分离（World + WorldManager / Executor / Renderer）
 - [x] 类型安全的动画键（AnemosKey）
-- [x] 单元测试（GoogleTest，覆盖指令、事件总线及核心数据模型 WorldModel）
+- [x] 单元测试（GoogleTest，覆盖指令、事件总线及核心数据模型）
 
 ## 核心模块
 
 > **注意**：Endeus 目前处于 **pre-alpha** 阶段，架构仍在探索中，以下模块仅为当前最小实现的拆分，未来可能重构。
 
-- **Director（导演）**  
-  负责脚本的执行流程控制：维护指令指针（PC）、处理标签跳转、等待异步操作（如点击、选项选择），并通过事件总线响应外部输入。它不关心具体画面如何渲染，只决定下一步执行哪条指令。
+![架构图](docs/architecture.svg)
 
-- **Runtime（运行时）**  
-  管理游戏的实际状态：纹理资源、图层（Layer）、对话框文字、选项按钮等。它执行具体的画面指令（显示/隐藏图层、设置说话人/内容），处理鼠标点击的命中测试（选项区域），并将所有内容绘制到窗口上。
+- **Director（导演）**  
+  负责脚本的执行流程控制：维护指令指针（PC）、处理标签跳转、等待异步操作（如点击、选项选择），并通过事件总线响应外部输入。它不关心具体画面如何渲染，只决定下一步执行哪条指令。  
+
+- **World & WorldManager（世界数据与管理器）**  
+  `World` 是纯数据容器，包含所有图层（位置、透明度、可见性）、说话人、当前对话内容。`WorldManager` 提供修改接口（如 `setLayerPosition`），并自动维护脏标记，为未来的快照和回滚预留基础。  
+
+- **Executor（指令执行器）**  
+  实现 `IExecutor` 接口，执行具体的画面指令（ShowLayer、HideLayer、MoveLayer、FadeLayer、SetSpeaker、SetContent 等）。它直接修改 `WorldManager` 中的世界状态，并启动动画（通过 `Anemoi`）。  
+
+- **Renderer（渲染器）**  
+  只负责绘制：从 `WorldManager` 读取当前世界状态，从 `Anemoi` 获取动画覆盖值（位置/透明度），并将所有图层、对话框、选项按钮绘制到窗口上。同时处理鼠标点击命中测试并发布事件（`ChoiceSelected` / `ActionCompleted`）。  
 
 - **EventBus（事件总线）**  
-  类型安全的消息中枢，用于解耦 Director、Runtime 和输入响应。例如鼠标点击 → 发布 `MouseClicked` → Runtime 判断是否点中选项 → 发布 `ChoiceSelected` → Director 跳转到对应标签。
+  类型安全的消息中枢，用于解耦 Director、Renderer 和输入响应。例如鼠标点击 → 发布 `MouseClicked` → Renderer 判断 → 发布 `ChoiceSelected` → Director 跳转。
 
 - **Instruction（指令）**  
-  所有脚本动作的静态描述。Director 逐条读取，同步指令由 Runtime 立即执行，异步指令则等待事件完成后再推进。
-
-- **WorldModel（世界模型）**  
-  纯数据模型，存储所有逻辑状态：图层（位置、透明度、可见性）、对话框文本、选项列表。与渲染逻辑分离，支持脏标记高效同步，并为动画系统和存档提供稳定接口。
+  所有脚本动作的静态描述。Director 逐条读取，同步指令由 Executor 立即执行，异步指令（`Wait`、`Choice`）则等待事件完成后再推进。
 
 - **Anemoi（动画系统）**  
-  风神，让画面随风而动的动画系统。管理图层的属性动画（移动、淡变等）。基于 `AnemosKey`（图层ID+属性）维护动画映射，确保同一属性同时只有一个动画。动画以非阻塞方式运行，不挂起剧情推进，支持 Skip（可配置）。
+  风神，让画面随风而动的动画系统。管理图层的属性动画（移动、淡变等）。基于 `AnemosKey`（图层ID+属性）维护动画映射，确保同一属性同时只有一个动画。动画以非阻塞方式运行，动画当前值会被 `Renderer` 覆盖到精灵上，不污染世界数据。
 
 ## 构建与运行
 
