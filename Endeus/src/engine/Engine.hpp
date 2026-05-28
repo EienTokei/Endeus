@@ -5,7 +5,10 @@
 
 #include "../script/Instruction.hpp"
 #include "../script/Director.hpp"
-#include "../runtime/Runtime.hpp"
+#include "../executor/Executor.hpp"
+#include "../anemoi/Anemoi.hpp"
+#include "../world/WorldManager.hpp"
+#include "../renderer/Renderer.hpp"
 
 
 namespace endeus {
@@ -45,10 +48,13 @@ namespace endeus {
 		 */
 		void buildScripts();
 
+		WorldManager m_worldManager;
 		sf::RenderWindow m_window;
 		EventBus m_eventBus;
-		Runtime m_runtime;
+		Executor m_executor;
+		Renderer m_renderer;
 		Director m_director;
+		Anemoi m_anemoi;
 		std::vector<Instruction> m_script;
 	};
 

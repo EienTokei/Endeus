@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Instruction.hpp"
-#include "IExecutor.hpp"
+#include "../executor/IExecutor.hpp"
 #include "../event/EventBus.hpp"
 
 #include <unordered_map>

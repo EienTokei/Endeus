@@ -53,7 +53,9 @@ namespace endeus {
 	}
 
 	void Renderer::draw(const World& world, std::vector<Instruction::Choice::Option> options) {
-		m_options = options;
+		if (!options.empty()) {
+			m_options = options;
+		}
 		syncDirtyLayers(world);
 		applyAnemoiOverrides();
 		// 1. 图层

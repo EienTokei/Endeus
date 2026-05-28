@@ -13,6 +13,8 @@ namespace endeus {
 
 		bool execute(const Instruction& instr) override;
 
+		void resetAsync() override;
+
 	private:
 		WorldManager& m_worldManager;
 		Anemoi& m_anemoi;

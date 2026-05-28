@@ -25,7 +25,6 @@ namespace endeus {
 		if (m_finished) {
 			return;
 		}
-		m_executor.update(dt);
 		if (m_waiting) {
 			return;
 		}
@@ -49,6 +48,10 @@ namespace endeus {
 			}
 			if (instr.is<Instruction::End>()) {
 				m_finished = true;
+				break;
+			}
+			if (instr.is<Instruction::Wait>()) {
+				m_waiting = true;
 				break;
 			}
 			bool completed = m_executor.execute(instr);

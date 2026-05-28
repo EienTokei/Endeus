@@ -34,6 +34,10 @@ namespace endeus {
 		return true;
 	}
 
+	void Executor::resetAsync() {
+		m_anemoi.resetAll();
+	}
+
 	bool Executor::handleShowLayer(const Instruction::ShowLayer& instr) {
 		LayerData data{ instr.textureKey, instr.order, true, instr.position, instr.alpha , instr.texRect };
 

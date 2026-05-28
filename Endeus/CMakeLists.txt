@@ -9,10 +9,13 @@ find_package(SFML COMPONENTS Graphics Window System REQUIRED)
 set(SOURCES
     src/main.cpp
     src/engine/Engine.cpp
-    src/runtime/Runtime.cpp
-    src/runtime/WorldModel.cpp
+    #src/runtime/Runtime.cpp
+    #src/runtime/WorldModel.cpp
     src/script/Director.cpp
-    src/runtime/anemoi/Anemoi.cpp
+    src/anemoi/Anemoi.cpp
+    src/executor/Executor.cpp
+    src/renderer/Renderer.cpp
+    src/world/WorldManager.cpp
     # ... 其他源文件
 )
 

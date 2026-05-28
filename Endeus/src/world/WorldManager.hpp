@@ -30,6 +30,9 @@ namespace endeus {
 		void setOptions(const std::vector<Instruction::Choice::Option>& opts) { m_options = opts; }
 		void clearOptions() { m_options.clear(); }
 		const auto& getOptions() const { return m_options; }
+		std::vector<Instruction::Choice::Option> takeOptions() {
+			return std::move(m_options);
+		}
 
 		void setWorld(World&& world);
 		const World& getWorld() const;
