@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "../script/Instruction.hpp"
-#include "../script/Director.hpp"
+#include "../director/Director.hpp"
 #include "../executor/Executor.hpp"
 #include "../anemoi/Anemoi.hpp"
 #include "../world/WorldManager.hpp"

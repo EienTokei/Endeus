@@ -9,7 +9,7 @@ find_package(SFML COMPONENTS Graphics Window System REQUIRED)
 set(SOURCES
     src/main.cpp
     src/engine/Engine.cpp
-    src/script/Director.cpp
+    src/director/Director.cpp
     src/anemoi/Anemoi.cpp
     src/executor/Executor.cpp
     src/renderer/Renderer.cpp

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Instruction.hpp"
+#include "../script/Instruction.hpp"
 #include "../executor/IExecutor.hpp"
 #include "../event/EventBus.hpp"
 
