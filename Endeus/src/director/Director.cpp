@@ -21,38 +21,42 @@ namespace endeus {
 		m_waiting = false;
 	}
 
-	void Director::update(float dt) {
+	DirectorResult Director::update(float dt) {
 		if (m_finished) {
-			return;
+			return DirectorResult(DirectorAction::Terminated);
 		}
 		if (m_waiting) {
-			return;
+			return DirectorResult(DirectorAction::Waiting);
 		}
-		execute();
+		return advance();
 	}
 
 	bool Director::isFinished() const {
 		return m_finished;
 	}
 
-	void Director::execute() {
+	DirectorResult Director::advance() {
 		while (!m_finished && m_pc < m_instructions.size()) {
 			const Instruction& instr = m_instructions[m_pc];
-			if (instr.is<Instruction::Label>()) {
+			if (const auto* label = instr.getIf<Instruction::Label>()) {
 				toNext();
-				continue;
+				//continue;
+				return DirectorResult(DirectorAction::TakePage, label->name);
 			}
 			if (const auto* jump = instr.getIf<Instruction::Jump>()) {
 				toLabel(jump->targetLabel);
-				continue;
+				//continue;
+				return DirectorResult(DirectorAction::TurnToPage, jump->targetLabel);
 			}
 			if (instr.is<Instruction::End>()) {
 				m_finished = true;
-				break;
+				//break;
+				return DirectorResult(DirectorAction::Terminated);
 			}
 			if (instr.is<Instruction::Wait>()) {
 				m_waiting = true;
-				break;
+				//break;
+				return DirectorResult(DirectorAction::Waiting);
 			}
 			bool completed = m_executor.execute(instr);
 			if(completed) {
@@ -60,9 +64,11 @@ namespace endeus {
 			}
 			else {
 				m_waiting = true;
-				break;		// 异步 -> 停止循环, 进入等待
+				//break;		// 异步 -> 停止循环, 进入等待
+				return DirectorResult(DirectorAction::Waiting);
 			}
 		}
+		return DirectorResult(DirectorAction::Terminated);		// 只有可能 m_finished 为 true 或 m_pc 执行完会跳出循环执行到这里
 	}
 
 	void Director::toNext() {
@@ -90,12 +96,12 @@ namespace endeus {
 		if (auto* choice = e.getIf<Event::ChoiceSelected>()) {
 			m_waiting = false;
 			toLabel(choice->targetLabel);
-			execute();
+			advance();
 		}
 		else if (e.is<Event::ActionCompleted>()) {
 			m_waiting = false;
 			toNext();
-			execute();
+			advance();
 		}
 	}
 

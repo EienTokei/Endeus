@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DirectorAction.hpp"
 #include "../script/Instruction.hpp"
 #include "../executor/IExecutor.hpp"
 #include "../event/Leyline.hpp"
@@ -12,12 +13,12 @@ namespace endeus {
 	public:
 		Director(IExecutor& executor, Leyline& leyline);
 		void init(const std::vector<Instruction>& instructions);
-		void update(float dt);
+		DirectorResult update(float dt);
 		bool isFinished() const;
 
 	private:
-		// 执行当前 m_pc 指向的指令
-		void execute();
+		// 从当前 m_pc 指向的指令开始推进
+		DirectorResult advance();
 		void toNext();
 		void toLabel(const std::string& label);
 		void onEvent(const Event& e);
