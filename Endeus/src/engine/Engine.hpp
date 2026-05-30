@@ -50,7 +50,7 @@ namespace endeus {
 
 		WorldManager m_worldManager;
 		sf::RenderWindow m_window;
-		EventBus m_eventBus;
+		Leyline m_leyline;
 		Executor m_executor;
 		Renderer m_renderer;
 		Director m_director;

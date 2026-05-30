@@ -4,8 +4,8 @@ namespace endeus {
 
 	Engine::Engine() : m_window(sf::VideoMode({ 1280, 720 }), "Endeus - The Janus Door within EnD.C")
 		, m_executor(m_worldManager, m_anemoi)
-		, m_director(m_executor, m_eventBus)
-		, m_renderer(m_eventBus, m_window, m_anemoi) {
+		, m_director(m_executor, m_leyline)
+		, m_renderer(m_leyline, m_window, m_anemoi) {
 		m_window.setFramerateLimit(60);   // 限制 60 FPS
 		loadAssets();
 		buildScripts();
@@ -36,7 +36,7 @@ namespace endeus {
 			else if (auto* pressed = event->getIf<sf::Event::MouseButtonPressed>()) {
 				if (pressed->button == sf::Mouse::Button::Left) {
 					sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
-					m_eventBus.publish(Event::MouseClicked{ static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)});
+					m_leyline.publish(Event::MouseClicked{ static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)});
 				}
 			}
 		}

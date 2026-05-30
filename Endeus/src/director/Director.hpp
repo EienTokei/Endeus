@@ -2,7 +2,7 @@
 
 #include "../script/Instruction.hpp"
 #include "../executor/IExecutor.hpp"
-#include "../event/EventBus.hpp"
+#include "../event/Leyline.hpp"
 
 #include <unordered_map>
 
@@ -10,7 +10,7 @@ namespace endeus {
 
 	class Director {
 	public:
-		Director(IExecutor& executor, EventBus& eventBus);
+		Director(IExecutor& executor, Leyline& leyline);
 		void init(const std::vector<Instruction>& instructions);
 		void update(float dt);
 		bool isFinished() const;
@@ -23,7 +23,7 @@ namespace endeus {
 		void onEvent(const Event& e);
 
 		IExecutor& m_executor;
-		EventBus& m_eventBus;
+		Leyline& m_leyline;
 		std::vector<Instruction> m_instructions;
 		std::unordered_map<std::string, size_t> m_labelMap;
 		size_t m_pc = 0;

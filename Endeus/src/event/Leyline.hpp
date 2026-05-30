@@ -7,7 +7,12 @@
 #include "Event.hpp"
 
 namespace endeus {
-	class EventBus {
+	/**
+	 * @brief 地脉总线 - 传递事件的网络
+	 * 
+	 * 灵感取自「时钟机关的Ley-Line」
+	 */
+	class Leyline {
 	public:
 		using Callback = std::function<void(const Event&)>;
 		

@@ -1,11 +1,11 @@
 #include "Director.hpp"
 
 namespace endeus {
-	Director::Director(IExecutor& executor, EventBus& eventBus)
-		: m_executor(executor), m_eventBus(eventBus) {
+	Director::Director(IExecutor& executor, Leyline& leyline)
+		: m_executor(executor), m_leyline(leyline) {
 		// 订阅事件
-		m_eventBus.subscribe<Event::ActionCompleted>([this](const Event& e) { onEvent(e); });
-		m_eventBus.subscribe<Event::ChoiceSelected>([this](const Event& e) { onEvent(e); });
+		m_leyline.subscribe<Event::ActionCompleted>([this](const Event& e) { onEvent(e); });
+		m_leyline.subscribe<Event::ChoiceSelected>([this](const Event& e) { onEvent(e); });
 	}
 
 	void Director::init(const std::vector<Instruction>& instructions) {

@@ -6,10 +6,10 @@
 
 namespace endeus {
 
-	Renderer::Renderer(EventBus& bus, sf::RenderWindow& window, Anemoi& anemoi)
-		: m_eventBus(bus), m_window(window), m_anemoi(anemoi), m_speakerText(nullptr), m_contentText(nullptr) {
+	Renderer::Renderer(Leyline& leyline, sf::RenderWindow& window, Anemoi& anemoi)
+		: m_leyline(leyline), m_window(window), m_anemoi(anemoi), m_speakerText(nullptr), m_contentText(nullptr) {
 		// 订阅点击事件
-		m_eventBus.subscribe<Event::MouseClicked>([this](const Event& e) {
+		m_leyline.subscribe<Event::MouseClicked>([this](const Event& e) {
 			if (auto* ev = e.getIf<Event::MouseClicked>()) {
 				sf::Vector2i pos(static_cast<int>(ev->position.x), static_cast<int>(ev->position.y));
 				onMouseClick(pos);
@@ -42,13 +42,13 @@ namespace endeus {
 					// 选中选项
 					std::string target = m_options[i].targetLabel;
 					m_options.clear();
-					m_eventBus.publish(Event::ChoiceSelected{ target });	// 发布选中事件
+					m_leyline.publish(Event::ChoiceSelected{ target });	// 发布选中事件
 					return;
 				}
 			}
 		}
 		else {
-			m_eventBus.publish(Event::ActionCompleted{});
+			m_leyline.publish(Event::ActionCompleted{});
 		}
 	}
 

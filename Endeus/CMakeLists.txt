@@ -61,7 +61,7 @@ list(REMOVE_ITEM TEST_SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 # 添加测试可执行文件
 add_executable(EndeusTests
     tests/test_instruction.cpp
-    tests/test_event_bus.cpp
+    "tests/test_leyline.cpp"
     tests/test_world_manager.cpp
     ${TEST_SRC_FILES}   # 直接包含业务源文件（不含 main）
 )

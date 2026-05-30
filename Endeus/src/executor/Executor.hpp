@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../event/EventBus.hpp"
-//#include "anemoi/Anemoi.hpp"
+#include "../anemoi/Anemoi.hpp"
 #include "../world/WorldManager.hpp"
 #include "IExecutor.hpp"
 
