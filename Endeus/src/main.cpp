@@ -17,6 +17,7 @@ void endeus::initLogger() {
     std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
     auto logger = std::make_shared<spdlog::logger>("endeus", sinks.begin(), sinks.end());
     logger->set_level(spdlog::level::trace);
+    logger->set_pattern("[%H:%M:%S.%e] [%^%l%$] [%n] [%s:%#] %v");
     spdlog::set_default_logger(logger);
     spdlog::flush_every(std::chrono::seconds(3));
 }
