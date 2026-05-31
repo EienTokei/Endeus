@@ -9,6 +9,7 @@
 #include "../anemoi/Anemoi.hpp"
 #include "../world/WorldManager.hpp"
 #include "../renderer/Renderer.hpp"
+#include "../album/WhiteAlbum.hpp"
 
 
 namespace endeus {
@@ -55,6 +56,7 @@ namespace endeus {
 		Renderer m_renderer;
 		Director m_director;
 		Anemoi m_anemoi;
+		WhiteAlbum m_album;
 		std::vector<Instruction> m_script;
 	};
 

@@ -19,6 +19,8 @@ namespace endeus {
 
 		void draw(const World& world, std::vector<Instruction::Choice::Option> options);
 
+		void clear();
+
 	private:
 		void onMouseClick(sf::Vector2i pos);
 

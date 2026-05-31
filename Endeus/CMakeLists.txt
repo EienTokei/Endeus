@@ -15,7 +15,7 @@ set(SOURCES
     src/renderer/Renderer.cpp
     src/world/WorldManager.cpp
     # ... 其他源文件
-)
+ "src/album/WhiteAlbum.cpp")
 
 add_executable(Endeus ${SOURCES})
 

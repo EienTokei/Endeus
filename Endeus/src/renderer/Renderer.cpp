@@ -66,6 +66,10 @@ namespace endeus {
 		drawChoices();
 	}
 
+	void Renderer::clear() {
+		m_layers.clear();
+	}
+
 	void Renderer::syncDirtyLayers(const World& world) {
 		for (auto& [id, data] : world.layers) {
 			auto texIt = m_textures.find(data.textureKey);		// 1. 查找纹理

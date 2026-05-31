@@ -1,5 +1,6 @@
 #include "Director.hpp"
 
+#include <iostream>
 namespace endeus {
 	Director::Director(IExecutor& executor, Leyline& leyline)
 		: m_executor(executor), m_leyline(leyline) {
@@ -41,30 +42,31 @@ namespace endeus {
 
 	void Director::recallMemento(const Memento& memento) {
 		m_pc = memento.pc;
-		m_waiting = true;		// 恢复后等待
+		m_waiting = false;		// 恢复后不等待, 否则会跳过 Label 后的第一个指令
 	}
 
 	DirectorResult Director::advance() {
 		while (!m_finished && m_pc < m_instructions.size()) {
 			const Instruction& instr = m_instructions[m_pc];
 			if (const auto* label = instr.getIf<Instruction::Label>()) {
+				std::cout << "Director: reached label " << label->name << std::endl;
 				toNext();
-				//continue;
 				return DirectorResult(DirectorAction::Memorize, label->name);
 			}
 			if (const auto* jump = instr.getIf<Instruction::Jump>()) {
-				toLabel(jump->targetLabel);
-				//continue;
-				return DirectorResult(DirectorAction::Recall, jump->targetLabel);
+				if (toFuture(jump->targetLabel)) {
+					continue;
+				}
+				else {
+					return DirectorResult(DirectorAction::Recall, jump->targetLabel);
+				}
 			}
 			if (instr.is<Instruction::End>()) {
 				m_finished = true;
-				//break;
 				return DirectorResult(DirectorAction::Terminated);
 			}
 			if (instr.is<Instruction::Wait>()) {
 				m_waiting = true;
-				//break;
 				return DirectorResult(DirectorAction::Waiting);
 			}
 			bool completed = m_executor.execute(instr);
@@ -87,11 +89,11 @@ namespace endeus {
 		}
 	}
 
-	void Director::toLabel(const std::string& label) {
+	bool endeus::Director::toFuture(const std::string& label) {
 		auto it = m_labelMap.find(label);
 		if (it != m_labelMap.end()) {
-			if (m_pc > it->second) {		// 这里简单处理: 当向前回滚时清空旧异步活动, 避免旧动画残留
-				m_executor.resetAsync();
+			if (m_pc >= it->second) {
+				return false;		// 在过去
 			}
 			m_pc = it->second;
 		}
@@ -99,18 +101,17 @@ namespace endeus {
 			// 标签不存在，停止
 			m_finished = true;
 		}
+		return true;
 	}
 
 	void Director::onEvent(const Event& e) {
 		if (auto* choice = e.getIf<Event::ChoiceSelected>()) {
 			m_waiting = false;
-			toLabel(choice->targetLabel);
-			advance();
+			toFuture(choice->targetLabel);
 		}
 		else if (e.is<Event::ActionCompleted>()) {
 			m_waiting = false;
 			toNext();
-			advance();
 		}
 	}
 

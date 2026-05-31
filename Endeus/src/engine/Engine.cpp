@@ -1,15 +1,33 @@
 #include "Engine.hpp"
+#include <iostream>
 
 namespace endeus {
 
 	Engine::Engine() : m_window(sf::VideoMode({ 1280, 720 }), "Endeus - The Janus Door within EnD.C")
 		, m_executor(m_worldManager, m_anemoi)
 		, m_director(m_executor, m_leyline)
-		, m_renderer(m_leyline, m_window, m_anemoi) {
+		, m_renderer(m_leyline, m_window, m_anemoi)
+		, m_album(m_director, m_worldManager){
 		m_window.setFramerateLimit(60);   // 限制 60 FPS
 		loadAssets();
 		buildScripts();
 		m_director.init(m_script);
+
+		// 订阅选项
+		m_leyline.subscribe<Event::ChoiceSelected>([this](const Event& e) {
+			auto* choice = e.getIf<Event::ChoiceSelected>();
+			if (!choice) {
+				return;
+			}
+
+			const std::string& target = choice->targetLabel;
+			if (m_album.hasLeaf(target)) {
+				m_anemoi.resetAll();
+				m_renderer.clear();
+				m_album.recall(target);
+			}
+			// 没有记忆则不回滚
+		});
 	}
 
 	void Engine::run() {
@@ -17,7 +35,29 @@ namespace endeus {
 		while (m_window.isOpen()) {
 			processEvents();
 			float dt = clock.restart().asSeconds();		// 重置起始点为当前时刻，并返回重置前经过的时间
-			m_director.update(dt);
+
+			auto result = m_director.update(dt);
+			switch (result.action) {
+			case DirectorAction::Memorize:
+				std::cout << "Memorize" << std::endl;
+				m_album.memorize(result.targetLabel.value());
+				break;
+			case DirectorAction::Recall:
+				if (m_album.hasLeaf(result.targetLabel.value())) {
+					m_anemoi.resetAll();
+					m_renderer.clear();
+					m_album.recall(result.targetLabel.value());
+				}
+				else {	// 没有这一页, 可能是未来的事情
+
+				}
+				break;
+			case DirectorAction::Waiting:
+				break;
+			case DirectorAction::Terminated:
+				break;
+			}
+
 			m_anemoi.update(dt);
 			m_window.clear(sf::Color::Black);			// 黑色填充后备缓冲区
 			m_renderer.draw(m_worldManager.getWorld(), m_worldManager.takeOptions());	// 绘制到后备缓冲区
@@ -79,13 +119,13 @@ namespace endeus {
 		m_script = {
 			// 初始画面
 			Instr(Instr::ShowLayer{"bg_janus", "bg_janus", {0,0}, 0.f, 0, {}}),
+			Instr(Instr::FadeLayer{"bg_janus", 1.0f, 1.f}),
 			Instr(Instr::SetSpeaker{"Endeus"}),
 			Instr(Instr::SetContent{"......", false}),
 			Instr(Instr::Wait()),		// 等待点击
 			Instr(Instr::SetContent{"............", false}),
 			Instr(Instr::Wait()),
 			Instr(Instr::Label{"restart"}),
-			Instr(Instr::FadeLayer{"bg_janus", 1.0f, 1.f}),
 			Instr(Instr::ShowLayer{"door", "door_sprite", {600,200}, 0.f, 1, {}}),
 			Instr(Instr::FadeLayer{"door", 0.8f, 1.f}),
 			Instr(Instr::SetContent{"写者借我构建故事。", false}),

@@ -27,7 +27,7 @@ namespace endeus {
 		// 从当前 m_pc 指向的指令开始推进
 		DirectorResult advance();
 		void toNext();
-		void toLabel(const std::string& label);
+		bool toFuture(const std::string& label);	// 迈向未来
 		void onEvent(const Event& e);
 
 		IExecutor& m_executor;
