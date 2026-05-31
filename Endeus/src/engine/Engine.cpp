@@ -1,5 +1,5 @@
 #include "Engine.hpp"
-#include <iostream>
+#include "../utils/Logger.hpp"
 
 namespace endeus {
 
@@ -12,6 +12,7 @@ namespace endeus {
 		loadAssets();
 		buildScripts();
 		m_director.init(m_script);
+		SPDLOG_DEBUG("Director initialized with {} instructions", m_script.size());
 
 		// 订阅选项
 		m_leyline.subscribe<Event::ChoiceSelected>([this](const Event& e) {
@@ -27,34 +28,52 @@ namespace endeus {
 				m_album.recall(target);
 			}
 			// 没有记忆则不回滚
+			SPDLOG_DEBUG("ChoiceSelected event: target={}, hasLeaf={}",
+						 target, m_album.hasLeaf(target));
 		});
+		SPDLOG_INFO("Engine constructed");
 	}
 
 	void Engine::run() {
+		SPDLOG_INFO("Engine run loop started");
+		int frameCount = 0;
+		float timeAcc = 0.0f;
+
 		sf::Clock clock;
 		while (m_window.isOpen()) {
 			processEvents();
 			float dt = clock.restart().asSeconds();		// 重置起始点为当前时刻，并返回重置前经过的时间
 
+			// 每 60 帧输出一次平均帧耗时
+			frameCount++;
+			timeAcc += dt;
+			if (frameCount >= 60) {
+				SPDLOG_TRACE("Average frame time: {} ms", (timeAcc / frameCount) * 1000.0f);
+				frameCount = 0;
+				timeAcc = 0.0f;
+			}
+
 			auto result = m_director.update(dt);
 			switch (result.action) {
 			case DirectorAction::Memorize:
-				std::cout << "Memorize" << std::endl;
+				SPDLOG_DEBUG("DirectorAction::Memorize for label: {}", result.targetLabel.value());
 				m_album.memorize(result.targetLabel.value());
 				break;
 			case DirectorAction::Recall:
 				if (m_album.hasLeaf(result.targetLabel.value())) {
+					SPDLOG_DEBUG("Recall label: {} (found in album)", result.targetLabel.value());
 					m_anemoi.resetAll();
 					m_renderer.clear();
 					m_album.recall(result.targetLabel.value());
 				}
 				else {	// 没有这一页, 可能是未来的事情
-
+					SPDLOG_WARN("Recall failed: label '{}' not found in album", result.targetLabel.value());
 				}
 				break;
 			case DirectorAction::Waiting:
 				break;
 			case DirectorAction::Terminated:
+				SPDLOG_INFO("Director terminated");
 				break;
 			}
 
@@ -63,19 +82,23 @@ namespace endeus {
 			m_renderer.draw(m_worldManager.getWorld(), m_worldManager.takeOptions());	// 绘制到后备缓冲区
 			m_window.display();							// 交换前后缓冲区 ( SFML 采用双缓冲技术)
 			if (m_director.isFinished()) {
+				SPDLOG_INFO("Engine finished, closing window");
 				m_window.close();
 			}
 		}
+		SPDLOG_INFO("Engine run loop ended");
 	}
 
 	void Engine::processEvents() {
 		while (auto event = m_window.pollEvent()) {
 			if (event->is<sf::Event::Closed>()) {
+				SPDLOG_INFO("Window closed event received");
 				m_window.close();
 			}
 			else if (auto* pressed = event->getIf<sf::Event::MouseButtonPressed>()) {
 				if (pressed->button == sf::Mouse::Button::Left) {
 					sf::Vector2i mousePos = sf::Mouse::getPosition(m_window);
+					SPDLOG_TRACE("Mouse clicked at ({}, {})", mousePos.x, mousePos.y);
 					m_leyline.publish(Event::MouseClicked{ static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)});
 				}
 			}
@@ -83,35 +106,31 @@ namespace endeus {
 	}
 
 	void Engine::loadAssets() {
+		SPDLOG_INFO("Loading assets...");
 		sf::Font font;
 		if (!font.openFromFile("assets/simkai.ttf")) {
+			SPDLOG_ERROR("Failed to open font: assets/simkai.ttf");
 			throw std::runtime_error("Failed to open font");
 		}
+		SPDLOG_DEBUG("Font loaded: simkai.ttf");
 		m_renderer.setFont(font);
 
-		sf::Texture texBg;
-		if (!texBg.loadFromFile("assets/bg_janus.png")) {
-			throw std::runtime_error("Missing bg_janus.png");
-		}
-		m_renderer.registerTexture("bg_janus", std::move(texBg));
+		auto loadTex = [this](const std::string& key, const std::string& path) {
+			sf::Texture tex;
+			if (!tex.loadFromFile(path)) {
+				SPDLOG_ERROR("Failed to load texture: {} from {}", key, path);
+				throw std::runtime_error("Missing " + path);
+			}
+			m_renderer.registerTexture(key, std::move(tex));
+			SPDLOG_DEBUG("Texture registered: {} <- {}", key, path);
+		};
 
-		sf::Texture texDoor;
-		if (!texDoor.loadFromFile("assets/door_sprite.png")) {
-			throw std::runtime_error("Missing door_sprite.png");
-		}
-		m_renderer.registerTexture("door_sprite", std::move(texDoor));
+		loadTex("bg_janus", "assets/bg_janus.png");
+		loadTex("door_sprite", "assets/door_sprite.png");
+		loadTex("ev_reader", "assets/ev_reader.png");
+		loadTex("ev_writer", "assets/ev_writer.png");
 
-		sf::Texture texReader;
-		if (!texReader.loadFromFile("assets/ev_reader.png")) {
-			throw std::runtime_error("Missing ev_reader.png");
-		}
-		m_renderer.registerTexture("ev_reader", std::move(texReader));
-
-		sf::Texture texWriter;
-		if (!texWriter.loadFromFile("assets/ev_writer.png")) {
-			throw std::runtime_error("Missing ev_writer.png");
-		}
-		m_renderer.registerTexture("ev_writer", std::move(texWriter));
+		SPDLOG_INFO("All assets loaded successfully");
 	}
 
 	void Engine::buildScripts() {
@@ -158,6 +177,7 @@ namespace endeus {
 			Instr(Instr::Wait()),
 			Instr(Instr::End{true}),
 		};
+		SPDLOG_DEBUG("Built script with {} instructions", m_script.size());
 	}
 
 } // namespace endeus
