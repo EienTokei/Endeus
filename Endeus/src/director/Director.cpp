@@ -39,7 +39,7 @@ namespace endeus {
 	}
 
 	Director::Memento Director::takeMemento() const {
-		SPDLOG_TRACE("takeMemento: pc={}", m_pc);
+		SPDLOG_DEBUG("takeMemento: pc={}", m_pc);
 		return Memento(m_pc);
 	}
 
@@ -93,6 +93,7 @@ namespace endeus {
 	}
 
 	void Director::toNext() {
+		size_t oldPc = m_pc;
 		m_pc++;
 		if (m_pc >= m_instructions.size()) {
 			m_finished = true;

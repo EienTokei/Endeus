@@ -109,10 +109,11 @@ namespace endeus {
 
 	bool Executor::handleSetContent(const Instruction::SetContent& instr) {
 		// 日志预览内容
-		SPDLOG_DEBUG("SetContent: append={}, text='{:.10}{}'",
-					 instr.append,
-					 instr.content,
-					 instr.content.size() > 10 ? "..." : "");
+		std::string preview = instr.content;
+		if (preview.size() > 15) {
+			preview = preview.substr(0, 12) + "...";
+		}
+		SPDLOG_DEBUG("SetContent: append={}, text='{}'", instr.append, preview);
 		m_worldManager.setContent(instr.content, instr.append);
 		return true;
 	}
