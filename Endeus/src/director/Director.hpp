@@ -16,6 +16,13 @@ namespace endeus {
 		DirectorResult update(float dt);
 		bool isFinished() const;
 
+		struct Memento {
+			size_t pc = 0;
+		};
+		Memento takeMemento() const;
+		void recallMemento(const Memento& memento);
+
+
 	private:
 		// 从当前 m_pc 指向的指令开始推进
 		DirectorResult advance();

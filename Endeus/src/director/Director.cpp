@@ -35,18 +35,27 @@ namespace endeus {
 		return m_finished;
 	}
 
+	Director::Memento Director::takeMemento() const {
+		return Memento(m_pc);
+	}
+
+	void Director::recallMemento(const Memento& memento) {
+		m_pc = memento.pc;
+		m_waiting = true;		// 恢复后等待
+	}
+
 	DirectorResult Director::advance() {
 		while (!m_finished && m_pc < m_instructions.size()) {
 			const Instruction& instr = m_instructions[m_pc];
 			if (const auto* label = instr.getIf<Instruction::Label>()) {
 				toNext();
 				//continue;
-				return DirectorResult(DirectorAction::TakePage, label->name);
+				return DirectorResult(DirectorAction::Memorize, label->name);
 			}
 			if (const auto* jump = instr.getIf<Instruction::Jump>()) {
 				toLabel(jump->targetLabel);
 				//continue;
-				return DirectorResult(DirectorAction::TurnToPage, jump->targetLabel);
+				return DirectorResult(DirectorAction::Recall, jump->targetLabel);
 			}
 			if (instr.is<Instruction::End>()) {
 				m_finished = true;
