@@ -4,6 +4,8 @@
 
 # 查找 SFML（vcpkg 会自动提供路径）
 find_package(SFML COMPONENTS Graphics Window System REQUIRED)
+# 查找 spdlog
+find_package(spdlog CONFIG REQUIRED) 
 
 # 将源代码添加到此项目的可执行文件。
 set(SOURCES
@@ -31,6 +33,7 @@ target_link_libraries(Endeus PRIVATE
     SFML::Graphics
     SFML::Window
     SFML::System
+    spdlog::spdlog
 )
 
 target_compile_options(Endeus PRIVATE /utf-8)
