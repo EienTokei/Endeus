@@ -85,11 +85,19 @@ namespace endeus {
 		return m_world;
 	}
 
-	//World WorldManager::mirror() const {
-	//	World another;
-	//	another = m_world;
-	//	return another;
-	//}
+	World WorldManager::mirror() const {
+		World another;
+		another = m_world;
+		return another;
+	}
+
+	WorldManager::Memento WorldManager::takeMemento() const {
+		return Memento(mirror());
+	}
+
+	void WorldManager::recallMemento(const Memento& memento) {
+		m_world = memento.world;
+	}
 
 } // namespace endeus
 

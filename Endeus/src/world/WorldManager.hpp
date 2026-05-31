@@ -36,7 +36,13 @@ namespace endeus {
 
 		void setWorld(World&& world);
 		const World& getWorld() const;
-		//World mirror() const;			// 另一个世界
+		World mirror() const;			// 另一个世界
+
+		struct Memento {
+			World world;
+		};
+		Memento takeMemento() const;
+		void recallMemento(const Memento& memento);
 
 	private:
 		World m_world;
