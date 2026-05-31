@@ -22,7 +22,19 @@ void endeus::initLogger() {
     spdlog::flush_every(std::chrono::seconds(3));
 }
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+void setupConsole() {
+#ifdef _WIN32
+    // 设置控制台输出代码页为 UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+}
+
 int main() {
+    setupConsole();
     endeus::initLogger();
     SPDLOG_INFO("Logger initialized, testing...");
 #ifdef _DEBUG

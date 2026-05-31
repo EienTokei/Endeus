@@ -1,8 +1,7 @@
 #include "Executor.hpp"
 #include "../anemoi/MoveLayerAnemos.hpp"
 #include "../anemoi/FadeLayerAnemos.hpp"
-
-#include <iostream>
+#include "../utils/Logger.hpp"
 
 namespace endeus {
 	Executor::Executor(WorldManager& worldManager, Anemoi& anemoi) : m_worldManager(worldManager), m_anemoi(anemoi){}
@@ -29,24 +28,30 @@ namespace endeus {
 		if (auto* choice = instr.getIf<Instruction::Choice>()) {
 			return handleChoice(*choice);
 		}
-		// 暂不实现
+		SPDLOG_WARN("Executor: unknown instruction type");
 		return true;
 	}
 
 	void Executor::resetAsync() {
+		SPDLOG_DEBUG("Executor resetAsync: clearing all animations");
 		m_anemoi.resetAll();
 	}
 
 	bool Executor::handleShowLayer(const Instruction::ShowLayer& instr) {
+		SPDLOG_DEBUG("ShowLayer: id='{}', texture='{}', pos=({},{}), alpha={}, order={}",
+					 instr.layerId, instr.textureKey,
+					 instr.position.x, instr.position.y, instr.alpha, instr.order);
 		LayerData data{ instr.textureKey, instr.order, true, instr.position, instr.alpha , instr.texRect };
 
 		if (!m_worldManager.addLayer(instr.layerId, data)) {
+			SPDLOG_DEBUG("ShowLayer: layer '{}' already exists, updating data", instr.layerId);
 			m_worldManager.setLayerData(instr.layerId, data);
 		}
 		return true;
 	}
 
 	bool Executor::handleHideLayer(const Instruction::HideLayer& instr) {
+		SPDLOG_DEBUG("HideLayer: id='{}'", instr.layerId);
 		m_worldManager.setLayerVisible(instr.layerId, false);
 		return true;
 	}
@@ -55,10 +60,13 @@ namespace endeus {
 		std::string id = instr.layerId;
 		const LayerData* layer = m_worldManager.getLayer(id);
 		if (!layer) {
-			std::cerr << "move: no layer - " << id << std::endl;
+			SPDLOG_WARN("MoveLayer: layer '{}' does not exist, skipping", id);
 			return true;
 		}
 
+		SPDLOG_DEBUG("MoveLayer: id='{}', from ({}, {}) to ({}, {}), duration={}s",
+					 id, layer->position.x, layer->position.y,
+					 instr.toPosition.x, instr.toPosition.y, instr.durationSeconds);
 		auto anemos = std::make_unique<MoveLayerAnemos>(
 			id,
 			m_worldManager.getLayer(id)->position,
@@ -75,10 +83,12 @@ namespace endeus {
 		std::string id = instr.layerId;
 		const LayerData* layer = m_worldManager.getLayer(id);
 		if (!layer) {
-			std::cerr << "move: no layer - " << id << std::endl;
+			SPDLOG_WARN("FadeLayer: layer '{}' does not exist, skipping", id);
 			return true;
 		}
 
+		SPDLOG_DEBUG("FadeLayer: id='{}', from alpha {} to {}, duration={}s",
+					 id, layer->alpha, instr.toAlpha, instr.durationSeconds);
 		auto anemos = std::make_unique<FadeLayerAnemos>(
 			id,
 			m_worldManager.getLayer(id)->alpha,
@@ -92,16 +102,29 @@ namespace endeus {
 	}
 
 	bool Executor::handleSetSpeaker(const Instruction::SetSpeaker& instr) {
+		SPDLOG_TRACE("SetSpeaker: '{}'", instr.name);
 		m_worldManager.setSpeaker(instr.name);
 		return true;
 	}
 
 	bool Executor::handleSetContent(const Instruction::SetContent& instr) {
+		// 日志预览内容
+		SPDLOG_DEBUG("SetContent: append={}, text='{:.10}{}'",
+					 instr.append,
+					 instr.content,
+					 instr.content.size() > 10 ? "..." : "");
 		m_worldManager.setContent(instr.content, instr.append);
 		return true;
 	}
 
 	bool Executor::handleChoice(const Instruction::Choice& instr) {
+		// 日志预览选项
+		std::string optionsStr;
+		for (size_t i = 0; i < instr.options.size(); ++i) {
+			if (i > 0) optionsStr += ", ";
+			optionsStr += instr.options[i].text;
+		}
+		SPDLOG_INFO("Choice: {} options -> [{}]", instr.options.size(), optionsStr);
 		m_worldManager.setOptions(instr.options);
 		return false;
 	}
