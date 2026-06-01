@@ -1,8 +1,7 @@
 #include "Renderer.hpp"
 #include "../anemoi/MoveLayerAnemos.hpp"
 #include "../anemoi/FadeLayerAnemos.hpp"
-
-#include <iostream>
+#include "../utils/Logger.hpp"
 
 namespace endeus {
 
@@ -15,13 +14,16 @@ namespace endeus {
 				onMouseClick(pos);
 			}
 		});
+		SPDLOG_DEBUG("Renderer subscribed to MouseClicked events");
 	}
 
 	void Renderer::registerTexture(const std::string& key, sf::Texture&& texture) {
+		SPDLOG_TRACE("Renderer registerTexture: key='{}'", key);
 		m_textures[key] = std::make_unique<sf::Texture>(std::move(texture));
 	}
 
 	void Renderer::setFont(const sf::Font& font) {
+		SPDLOG_TRACE("Renderer font set");
 		m_font = font;
 		m_speakerText = std::make_unique<sf::Text>(m_font);
 		m_speakerText->setFillColor(sf::Color::Yellow);
@@ -41,6 +43,7 @@ namespace endeus {
 				if (optionRects[i].contains(fpos)) {
 					// 选中选项
 					std::string target = m_options[i].targetLabel;
+					SPDLOG_DEBUG("Renderer: option selected '{}' -> target '{}'", m_options[i].text, target);
 					m_options.clear();
 					m_leyline.publish(Event::ChoiceSelected{ target });	// 发布选中事件
 					return;
@@ -48,6 +51,7 @@ namespace endeus {
 			}
 		}
 		else {
+			SPDLOG_TRACE("Renderer: click without options, publish ActionCompleted");
 			m_leyline.publish(Event::ActionCompleted{});
 		}
 	}
@@ -67,6 +71,7 @@ namespace endeus {
 	}
 
 	void Renderer::clear() {
+		SPDLOG_DEBUG("clear: removing all cached sprites");
 		m_layers.clear();
 	}
 
@@ -75,7 +80,7 @@ namespace endeus {
 			auto texIt = m_textures.find(data.textureKey);		// 1. 查找纹理
 			if (texIt == m_textures.end()) {
 				// 纹理不存在，跳过
-				std::cerr << "sync: no texture - " << data.textureKey << std::endl;
+				SPDLOG_WARN("syncDirtyLayers: no texture '{}' for layer '{}'", data.textureKey, id);
 				data.dirty = false;
 				continue;
 			}
@@ -116,6 +121,11 @@ namespace endeus {
 
 	void Renderer::applyAnemoiOverrides() {
 		for (auto& [key, anemos] : m_anemoi.getAnemosMap()) {
+			auto it = m_layers.find(key.layerId);
+			if (it == m_layers.end()) {
+				SPDLOG_WARN("applyAnemoiOverrides: layer '{}' not found for animation override", key.layerId);
+				continue;
+			}
 			sf::Sprite* sprite = m_layers[key.layerId].get();
 			if (key.property == AnemosKey::Property::Alpha) {
 				if (auto* fade = dynamic_cast<const FadeLayerAnemos*>(anemos.get())) {
