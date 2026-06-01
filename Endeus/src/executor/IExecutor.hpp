@@ -9,7 +9,7 @@ namespace endeus {
 		virtual ~IExecutor() = default;
 
 		// 执行一条指令
-		virtual bool execute(const Instruction& instr) = 0;
+		[[nodiscard]] virtual bool execute(const Instruction& instr) = 0;
 
 		// 清空异步活动
 		virtual void resetAsync() = 0;

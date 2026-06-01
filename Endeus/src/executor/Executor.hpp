@@ -10,7 +10,7 @@ namespace endeus {
 	public:
 		Executor(WorldManager& worldManager, Anemoi& anemoi);
 
-		bool execute(const Instruction& instr) override;
+		[[nodiscard]] bool execute(const Instruction& instr) override;
 
 		void resetAsync() override;
 

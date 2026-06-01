@@ -13,19 +13,19 @@ namespace endeus {
 	public:
 		Director(IExecutor& executor, Leyline& leyline);
 		void init(const std::vector<Instruction>& instructions);
-		DirectorResult update(float dt);
+		[[nodiscard]] DirectorResult update(float dt);
 		bool isFinished() const;
 
 		struct Memento {
 			size_t pc = 0;
 		};
-		Memento takeMemento() const;
+		[[nodiscard]] Memento takeMemento() const;
 		void recallMemento(const Memento& memento);
 
 
 	private:
 		// 从当前 m_pc 指向的指令开始推进
-		DirectorResult advance();
+		[[nodiscard]] DirectorResult advance();
 		void toNext();
 		bool toFuture(const std::string& label);	// 迈向未来
 		void onEvent(const Event& e);
