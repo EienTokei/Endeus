@@ -45,7 +45,6 @@
 
 - 同一业务操作**只在最上层（Executor/Director）打印一条 debug 日志**。
 - 下层（WorldManager/Anemoi 内部）不打印 debug 级别的相同信息，如需细节使用 `trace`。
-- 如果两个模块打印的信息互补（如 Executor 输出文本内容，WorldManager 输出模式），考虑合并到 Executor 一条日志中。
 - 本质相同的系列操作（如保存/恢复各个快照），日志内容（级别、格式、详细程度）应保持一致，避免因模块不同而产生不对称的观测体验。
 
 ---
