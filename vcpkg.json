@@ -1,7 +1,10 @@
 {
   "name": "endeus",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "dependencies": [
-    "sfml"
-  ]
+    "sfml",
+    "gtest",
+    "spdlog"
+  ],
+  "builtin-baseline": "e0b785fa42e9b3ee27f62e54f65e41358a1d2671"
 }

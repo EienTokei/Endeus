@@ -1,0 +1,46 @@
+name: unit-test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Windows (x64) - Debug
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgJsonGlob: vcpkg.json
+
+      - name: Install Ninja
+        uses: llvm/actions/install-ninja@main
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure CMake (x64-debug)
+        run: cmake --preset x64-debug
+
+      - name: Build tests only
+        run: cmake --build out/build/x64-debug --target EndeusTests --config Debug
+
+      - name: Run tests
+        run: |
+          $testExe = ".\out\build\x64-debug\bin\EndeusTests.exe"
+          if (Test-Path $testExe) {
+            & $testExe
+          } else {
+            Write-Error "Test executable not found at $testExe"
+            exit 1
+          }
+        shell: pwsh
