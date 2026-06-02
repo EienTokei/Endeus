@@ -5,5 +5,6 @@
     "sfml",
     "gtest",
     "spdlog"
-  ]
+  ],
+  "builtin-baseline": "e0b785fa42e9b3ee27f62e54f65e41358a1d2671"
 }

@@ -89,5 +89,4 @@ set_target_properties(EndeusTests PROPERTIES
 
 # 启用测试并自动发现
 enable_testing()
-include(GoogleTest)
-gtest_discover_tests(EndeusTests)
+add_test(NAME EndeusTests COMMAND $<TARGET_FILE:EndeusTests>)
