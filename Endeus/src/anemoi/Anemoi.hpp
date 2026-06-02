@@ -1,9 +1,8 @@
 #pragma once
 
 #include <unordered_map>
-#include <memory>
 
-#include "IAnemos.hpp"
+#include "Anemos.hpp"
 
 namespace endeus {
 
@@ -14,7 +13,7 @@ namespace endeus {
 	 */
 	class Anemoi {
 	public:
-		void add(std::unique_ptr<IAnemos> anemos);
+		void add(AnemosVariant anemos);
 
 		// true -> 还有动画播放
 		bool update(float dt);
@@ -27,10 +26,9 @@ namespace endeus {
 
 		void clear();
 
-		const std::unordered_map<AnemosKey, std::unique_ptr<IAnemos>>& getAnemosMap() const;
-
+		[[nodiscard]] std::unordered_map<AnemosKey, AnemosOverrides> getOverrides() const;
 	private:
-		std::unordered_map<AnemosKey, std::unique_ptr<IAnemos>> m_anemosMap;
+		std::unordered_map<AnemosKey, AnemosVariant> m_anemosMap;
 	};
 
 } // namespace endeus

@@ -3,7 +3,7 @@
 
 namespace endeus {
 
-	Engine::Engine() : m_window(sf::VideoMode({ 1280, 720 }), "Endeus - The Janus Door within EnD.C")
+	Engine::Engine() : m_window(sf::VideoMode({ 1280, 720 }), "Endeus - The Janus Door within EnD.C", sf::Style::Titlebar | sf::Style::Close)
 		, m_executor(m_worldManager, m_anemoi)
 		, m_director(m_executor, m_leyline)
 		, m_renderer(m_leyline, m_window, m_anemoi)

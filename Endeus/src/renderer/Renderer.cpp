@@ -1,6 +1,5 @@
 #include "Renderer.hpp"
-#include "../anemoi/MoveLayerAnemos.hpp"
-#include "../anemoi/FadeLayerAnemos.hpp"
+#include "../anemoi/Anemos.hpp"
 #include "../utils/Logger.hpp"
 
 namespace endeus {
@@ -120,25 +119,21 @@ namespace endeus {
 	}
 
 	void Renderer::applyAnemoiOverrides() {
-		for (auto& [key, anemos] : m_anemoi.getAnemosMap()) {
+		for (auto& [key, overrides] : m_anemoi.getOverrides()) {
 			auto it = m_layers.find(key.layerId);
 			if (it == m_layers.end()) {
 				SPDLOG_WARN("applyAnemoiOverrides: layer '{}' not found for animation override", key.layerId);
 				continue;
 			}
-			sf::Sprite* sprite = m_layers[key.layerId].get();
-			if (key.property == AnemosKey::Property::Alpha) {
-				if (auto* fade = dynamic_cast<const FadeLayerAnemos*>(anemos.get())) {
-					sf::Color color = sprite->getColor();
-					color.a = static_cast<unsigned char>(fade->getCurrent() * 255);
-					sprite->setColor(color);
-				}
+			sf::Sprite* sprite = it->second.get();
+			if (overrides.position) {
+				sprite->setPosition({ overrides.position->x, overrides.position->y });
 			}
-			if (key.property == AnemosKey::Property::Position) {
-				if (auto* move = dynamic_cast<const MoveLayerAnemos*>(anemos.get())) {
-					Vec2f pos = move->getCurrent();
-					sprite->setPosition({ pos.x, pos.y });
-				}
+			if (overrides.alpha) {
+				sf::Color color = sprite->getColor();
+				color.a = static_cast<unsigned char>(*overrides.alpha * 255);
+				sprite->setColor(color);
+				SPDLOG_TRACE("Overriding alpha for layer {}: {}", key.layerId, *overrides.alpha);
 			}
 		}
 	}

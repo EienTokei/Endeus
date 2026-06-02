@@ -1,6 +1,5 @@
 #include "Executor.hpp"
-#include "../anemoi/MoveLayerAnemos.hpp"
-#include "../anemoi/FadeLayerAnemos.hpp"
+#include "../anemoi/Anemos.hpp"
 #include "../utils/Logger.hpp"
 
 namespace endeus {
@@ -67,12 +66,14 @@ namespace endeus {
 		SPDLOG_DEBUG("MoveLayer: id='{}', from ({}, {}) to ({}, {}), duration={}s",
 					 id, layer->position.x, layer->position.y,
 					 instr.toPosition.x, instr.toPosition.y, instr.durationSeconds);
-		auto anemos = std::make_unique<MoveLayerAnemos>(
+		MoveAnemos anemos{
 			id,
-			m_worldManager.getLayer(id)->position,
-			instr.toPosition,
-			instr.durationSeconds
-		);
+			layer->position,		// from
+			instr.toPosition,		// to
+			layer->position,		// current
+			instr.durationSeconds,
+			0.0f
+		};
 		m_anemoi.add(std::move(anemos));
 
 		m_worldManager.setLayerPosition(id, instr.toPosition);		// 直接记录最终效果, 插值由动画系统负责
@@ -89,12 +90,14 @@ namespace endeus {
 
 		SPDLOG_DEBUG("FadeLayer: id='{}', from alpha {} to {}, duration={}s",
 					 id, layer->alpha, instr.toAlpha, instr.durationSeconds);
-		auto anemos = std::make_unique<FadeLayerAnemos>(
+		FadeAnemos anemos{
 			id,
-			m_worldManager.getLayer(id)->alpha,
-			instr.toAlpha,
-			instr.durationSeconds
-		);
+			layer->alpha,		// from
+			instr.toAlpha,		// to
+			layer->alpha,		// current
+			instr.durationSeconds, 
+			0.0f
+		};
 		m_anemoi.add(std::move(anemos));
 
 		m_worldManager.setLayerAlpha(id, instr.toAlpha);		// 直接记录最终效果, 插值由动画系统负责

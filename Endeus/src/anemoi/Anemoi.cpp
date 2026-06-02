@@ -2,35 +2,49 @@
 #include "../utils/Logger.hpp"
 
 namespace endeus {
-	void Anemoi::add(std::unique_ptr<IAnemos> anemos) {
-		auto key = anemos->getKey();
-		SPDLOG_TRACE("Anemoi add: layer='{}', property={}",
-					 key.layerId, static_cast<int>(key.property));
+	void Anemoi::add(AnemosVariant anemos) {
+		std::string layerId = std::visit([](auto& t) -> std::string {
+			return t.layerId;
+		}, anemos);
+		auto index = anemos.index();		// 运行时索引
+		AnemosKey key{ std::move(layerId), index };
+		SPDLOG_TRACE("Anemoi add: layer='{}', property={}", key.layerId, key.propertyIndex);
 		m_anemosMap[key] = std::move(anemos);
 	}
 
 	bool Anemoi::update(float dt) {
-		size_t erased = std::erase_if(m_anemosMap, [&](auto& pair) -> bool {
-			return pair.second->update(dt);
+		for (auto& [_, variant] : m_anemosMap) {
+			std::visit([dt](auto& anemos) {
+				anemos.update(dt);
+			}, variant);
+		}
+		size_t erased = std::erase_if(m_anemosMap, [](auto& pair) -> bool {
+			return std::visit([](auto& anemos) {
+				return anemos.isFinished();
+			}, pair.second);
 		});
 		if (erased > 0) {
-			SPDLOG_TRACE("Anemoi update: {} animation(s) completed", erased);
+			SPDLOG_DEBUG("Anemoi update: {} animation(s) completed", erased);
 		}
 		return !m_anemosMap.empty();
 	}
 
 	void Anemoi::skipAll() {
 		SPDLOG_DEBUG("Anemoi skipAll: clearing {} animations", m_anemosMap.size());
-		for (auto& [_, anemos] : m_anemosMap) {
-			anemos->skip();
+		for (auto& [_, variant] : m_anemosMap) {
+			std::visit([](auto& anemos) {
+				anemos.skip();
+			}, variant);
 		}
 		clear();
 	}
 
 	void Anemoi::resetAll() {
 		SPDLOG_DEBUG("Anemoi resetAll: resetting {} animations", m_anemosMap.size());
-		for (auto& [_, anemos] : m_anemosMap) {
-			anemos->reset();
+		for (auto& [_, variant] : m_anemosMap) {
+			std::visit([](auto& anemos) {
+				anemos.reset();
+			}, variant);
 		}
 		clear();
 	}
@@ -44,8 +58,14 @@ namespace endeus {
 		m_anemosMap.clear();
 	}
 
-	const std::unordered_map<AnemosKey, std::unique_ptr<IAnemos>>& Anemoi::getAnemosMap() const {
-		return m_anemosMap;
+	std::unordered_map<AnemosKey, AnemosOverrides> Anemoi::getOverrides() const {
+		std::unordered_map<AnemosKey, AnemosOverrides> result;
+		for (auto& [key, variant] : m_anemosMap) {
+			result[key] = std::visit([](auto& anemos) {
+				return anemos.getOverrides();
+			}, variant);
+		}
+		return result;
 	}
 
 } // namespace endeus
