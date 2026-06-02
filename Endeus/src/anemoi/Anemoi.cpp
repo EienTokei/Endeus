@@ -13,11 +13,6 @@ namespace endeus {
 	}
 
 	bool Anemoi::update(float dt) {
-		for (auto& [_, variant] : m_anemosMap) {
-			std::visit([dt](auto& anemos) {
-				anemos.update(dt);
-			}, variant);
-		}
 		size_t erased = std::erase_if(m_anemosMap, [](auto& pair) -> bool {
 			return std::visit([](auto& anemos) {
 				return anemos.isFinished();
@@ -26,6 +21,12 @@ namespace endeus {
 		if (erased > 0) {
 			SPDLOG_DEBUG("Anemoi update: {} animation(s) completed", erased);
 		}
+		for (auto& [_, variant] : m_anemosMap) {
+			std::visit([dt](auto& anemos) {
+				anemos.update(dt);
+			}, variant);
+		}
+		// 不删除已完成动画, 避免渲染器未能绘制最终状态导致残留[#2]
 		return !m_anemosMap.empty();
 	}
 

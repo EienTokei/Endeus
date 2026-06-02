@@ -44,6 +44,7 @@ namespace endeus {
 			processEvents();
 			float dt = clock.restart().asSeconds();		// 重置起始点为当前时刻，并返回重置前经过的时间
 
+			//sf::sleep(sf::milliseconds(200));
 			// 每 60 帧输出一次平均帧耗时
 			frameCount++;
 			timeAcc += dt;
