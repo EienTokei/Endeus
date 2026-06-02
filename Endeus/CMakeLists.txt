@@ -76,6 +76,7 @@ target_link_libraries(EndeusTests PRIVATE
     SFML::System
     GTest::gtest
     GTest::gtest_main
+    spdlog::spdlog
 )
 
 target_compile_options(EndeusTests PRIVATE /utf-8)
