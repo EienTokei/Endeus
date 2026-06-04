@@ -61,10 +61,10 @@ git checkout develop
   实现 `IExecutor` 接口，执行具体的画面指令（ShowLayer、HideLayer、MoveLayer、FadeLayer、SetSpeaker、SetContent 等）。它直接修改 `WorldManager` 中的世界状态，并启动动画（通过 `Anemoi`）。  
 
 - **Renderer（渲染器）**  
-  只负责绘制：从 `WorldManager` 读取当前世界状态，从 `Anemoi` 获取动画覆盖值（位置/透明度），并将所有图层、对话框、选项按钮绘制到窗口上。同时处理鼠标点击命中测试并发布事件（`ChoiceSelected` / `ActionCompleted`）。  
+  只负责绘制：从 `World` 读取当前世界状态，从 `Anemoi` 获取动画覆盖值（位置/透明度），并将所有图层、对话框、选项按钮绘制到窗口上。同时处理鼠标点击命中测试并发布事件（`ChoiceSelected` / `ActionCompleted`）。  
 
-- **EventBus（事件总线）**  
-  类型安全的消息中枢，用于解耦 Director、Renderer 和输入响应。例如鼠标点击 → 发布 `MouseClicked` → Renderer 判断 → 发布 `ChoiceSelected` → Director 跳转。
+- **Leyline（事件总线）**  
+  类型安全的消息中枢，用于解耦 Director、Renderer 和输入响应。例如鼠标点击 → 发布 `MouseClicked` → Renderer 判断 → 发布 `ChoiceSelected` → Director 跳转 / WhiteAlbum 回溯。
 
 - **Instruction（指令）**  
   所有脚本动作的静态描述。Director 逐条读取，同步指令由 Executor 立即执行，异步指令（`Wait`、`Choice`）则等待事件完成后再推进。
