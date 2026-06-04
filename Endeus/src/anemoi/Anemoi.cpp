@@ -3,6 +3,8 @@
 
 namespace endeus {
 	void Anemoi::add(AnemosVariant anemos) {
+		// std::visit + 泛型 lambda 会在编译期为每个子类型实例化一个重载，运行时根据索引直接调用对应版本
+		// auto& 会被推导为具体的子类型引用而不是整个 variant
 		std::string layerId = std::visit([](auto& t) -> std::string {
 			return t.layerId;
 		}, anemos);
@@ -13,6 +15,7 @@ namespace endeus {
 	}
 
 	bool Anemoi::update(float dt) {
+		// 移除上一帧完成的动画
 		size_t erased = std::erase_if(m_anemosMap, [](auto& pair) -> bool {
 			return std::visit([](auto& anemos) {
 				return anemos.isFinished();
@@ -26,7 +29,7 @@ namespace endeus {
 				anemos.update(dt);
 			}, variant);
 		}
-		// 不删除已完成动画, 避免渲染器未能绘制最终状态导致残留[#2]
+		// 不删除本帧完成的动画, 避免渲染器未能绘制最终状态导致残留[#2]
 		return !m_anemosMap.empty();
 	}
 
