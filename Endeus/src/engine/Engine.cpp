@@ -23,7 +23,7 @@ namespace endeus {
 
 			const std::string& target = choice->targetLabel;
 			if (m_album.hasLeaf(target)) {
-				m_anemoi.resetAll();
+				m_anemoi.clear();
 				m_renderer.clear();
 				m_album.recall(target);
 			}
@@ -63,7 +63,7 @@ namespace endeus {
 			case DirectorAction::Recall:
 				if (m_album.hasLeaf(result.targetLabel.value())) {
 					SPDLOG_DEBUG("Recall label: {} (found in album)", result.targetLabel.value());
-					m_anemoi.resetAll();
+					m_anemoi.clear();
 					m_renderer.clear();
 					m_album.recall(result.targetLabel.value());
 				}

@@ -40,7 +40,6 @@ namespace endeus {
 				anemos.skip();
 			}, variant);
 		}
-		clear();
 	}
 
 	void Anemoi::resetAll() {
@@ -50,7 +49,6 @@ namespace endeus {
 				anemos.reset();
 			}, variant);
 		}
-		clear();
 	}
 
 	bool Anemoi::isPlaying() const {
