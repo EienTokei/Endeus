@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 #include "../utils/Logger.hpp"
+#include "../audio/GloriousDays.hpp"
 
 namespace endeus {
 
@@ -14,6 +15,9 @@ namespace endeus {
 		m_director.init(m_script);
 		SPDLOG_DEBUG("Director initialized with {} instructions", m_script.size());
 
+		GloriousDays::getInstance().setBGMVolume(25.f);
+		GloriousDays::getInstance().setSEVolume(50.f);
+
 		// 订阅选项
 		m_leyline.subscribe<Event::ChoiceSelected>([this](const Event& e) {
 			auto* choice = e.getIf<Event::ChoiceSelected>();
@@ -23,6 +27,7 @@ namespace endeus {
 
 			const std::string& target = choice->targetLabel;
 			if (m_album.hasLeaf(target)) {
+				GloriousDays::getInstance().clear();
 				m_anemoi.clear();
 				m_renderer.clear();
 				m_album.recall(target);
@@ -63,6 +68,7 @@ namespace endeus {
 			case DirectorAction::Recall:
 				if (m_album.hasLeaf(result.targetLabel.value())) {
 					SPDLOG_DEBUG("Recall label: {} (found in album)", result.targetLabel.value());
+					GloriousDays::getInstance().clear();
 					m_anemoi.clear();
 					m_renderer.clear();
 					m_album.recall(result.targetLabel.value());
@@ -78,6 +84,7 @@ namespace endeus {
 				break;
 			}
 
+			GloriousDays::getInstance().update();
 			m_anemoi.update(dt);
 			m_window.clear(sf::Color::Black);			// 黑色填充后备缓冲区
 			m_renderer.draw(m_worldManager.getWorld(), m_worldManager.takeOptions());	// 绘制到后备缓冲区
@@ -146,6 +153,7 @@ namespace endeus {
 			Instr(Instr::SetContent{"............", false}),
 			Instr(Instr::Wait()),
 			Instr(Instr::Label{"restart"}),
+			Instr(Instr::PlayBGM{"assets/bgm.ogg"}),
 			Instr(Instr::ShowLayer{"door", "door_sprite", {600,200}, 0.f, 1, {}}),
 			Instr(Instr::FadeLayer{"door", 0.8f, 1.f}),
 			Instr(Instr::SetContent{"写者借我构建故事。", false}),
@@ -164,6 +172,7 @@ namespace endeus {
 			Instr(Instr::Choice{{{"写者", "writer"}, {"读者", "reader"}, {"我再想想", "restart"}}}),
 			// 分支
 			Instr(Instr::Label{"writer"}),
+			Instr(Instr::PlaySE{"assets/se_door_open.ogg"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_writer", "ev_writer", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"ev_writer", 1.0f, 1.f}),
@@ -171,6 +180,7 @@ namespace endeus {
 			Instr(Instr::Wait()),
 			Instr(Instr::End{true}),
 			Instr(Instr::Label{"reader"}),
+			Instr(Instr::PlaySE{"assets/se_door_open.ogg"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_reader", "ev_reader", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"ev_reader", 1.0f, 1.f}),

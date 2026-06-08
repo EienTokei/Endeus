@@ -7,9 +7,11 @@
 | 文件名 | 类型 | 推荐规格/说明 |
 |--------|------|----------------|
 | bg_janus.png | 图片 | 1280×720 像素 |
+| bgm.ogg | 音频 | 常见音频格式 |
 | door_sprite.png | 图片 | 582×540 像素 |
 | ev_reader.png | 图片 | 1280×720 像素 |
 | ev_writer.png | 图片 | 1280×720 像素 |
+| se_door_open.ogg | 音频 | 常见音频格式 |
 | simkai.ttf | 字体 | TrueType/OpenType 字体文件 |
 
 ## 合法素材获取途径

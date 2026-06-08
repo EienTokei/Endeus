@@ -60,6 +60,18 @@ namespace endeus {
 			bool append = false;
 		};
 
+		// ========================= 音频类指令 =========================
+
+		/// 播放 BGM
+		struct PlayBGM {
+			std::string path;
+		};
+
+		/// 播放 SE
+		struct PlaySE {
+			std::string path;
+		};
+
 		// ========================= 流程控制类指令 =========================
 
 		/// 选项分支
@@ -139,6 +151,8 @@ namespace endeus {
 			HideLayer,
 			MoveLayer,
 			FadeLayer,
+			PlayBGM,
+			PlaySE,
 			SetSpeaker,
 			SetContent,
 			Choice,

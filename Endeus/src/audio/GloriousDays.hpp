@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <filesystem>
 
 namespace endeus {
 
@@ -21,11 +22,11 @@ namespace endeus {
 		 */
 		static GloriousDays& getInstance();		// 音频硬件全局唯一且任何模块都可能随时播放声音，单例提供最直接、无依赖的访问方式。
 
-		void playBGM(const std::string& filepath);
+		void playBGM(const std::filesystem::path& filepath);
 
 		void stopBGM();
 
-		void playSE(const std::string& filepath);
+		void playSE(const std::filesystem::path& filepath);
 
 		void setBGMVolume(float volume);
 		void setSEVolume(float volume);

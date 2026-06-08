@@ -7,15 +7,15 @@ namespace endeus {
 		return instance;
 	}
 
-	void GloriousDays::playBGM(const std::string& filepath) {
+	void GloriousDays::playBGM(const std::filesystem::path& filepath) {
 		if (!m_bgm.openFromFile(filepath)) {
-			SPDLOG_ERROR("Failed to load BGM: {}", filepath);
+			SPDLOG_ERROR("Failed to load BGM: {}", filepath.string());
 			return;
 		}
 		m_bgm.setLooping(true);
 		m_bgm.setVolume(m_bgmVolume);
 		m_bgm.play();
-		SPDLOG_DEBUG("BGM started: {}", filepath);
+		SPDLOG_DEBUG("BGM started: {}", filepath.string());
 	}
 
 	void GloriousDays::stopBGM() {
@@ -23,23 +23,23 @@ namespace endeus {
 		SPDLOG_DEBUG("BGM stopped");
 	}
 
-	void GloriousDays::playSE(const std::string& filepath) {
-		auto it = m_soundBuffers.find(filepath);
+	void GloriousDays::playSE(const std::filesystem::path& filepath) {
+		auto it = m_soundBuffers.find(filepath.string());
 		if (it == m_soundBuffers.end()) {
 			sf::SoundBuffer buffer;
 			if (!buffer.loadFromFile(filepath)) {
-				SPDLOG_ERROR("Failed to load SE: {}", filepath);
+				SPDLOG_ERROR("Failed to load SE: {}", filepath.string());
 				return;
 			}
-			it = m_soundBuffers.emplace(filepath, std::move(buffer)).first;
+			it = m_soundBuffers.emplace(filepath.string(), std::move(buffer)).first;
 		}
 
-		sf::Sound sound(it->second);
+		// 直接在容器中构造，SFML 的 sf::Sound 移动构造函数没有转移播放状态
+		auto& sound = m_activeSEs.emplace_back(it->second);
 		sound.setVolume(m_seVolume);
 		sound.play();
 
-		m_activeSEs.emplace_back(std::move(sound));
-		SPDLOG_DEBUG("SE played: {}", filepath);
+		SPDLOG_DEBUG("SE played: {}", filepath.string());
 	}
 
 	void GloriousDays::setBGMVolume(float volume) {
@@ -55,9 +55,12 @@ namespace endeus {
 	}
 
 	void GloriousDays::update() {
-		std::erase_if(m_activeSEs, [](const auto& se) {
+		size_t erased = std::erase_if(m_activeSEs, [](const auto& se) {
 			return se.getStatus() == sf::Sound::Status::Stopped;
 		});
+		if (erased > 0) {
+			SPDLOG_DEBUG("GloriousDays update: {} SE(s) completed", erased);
+		}
 	}
 
 	void GloriousDays::clear() {

@@ -1,6 +1,7 @@
 #include "Executor.hpp"
 #include "../anemoi/Anemos.hpp"
 #include "../utils/Logger.hpp"
+#include "../audio/GloriousDays.hpp"
 
 namespace endeus {
 	Executor::Executor(WorldManager& worldManager, Anemoi& anemoi) : m_worldManager(worldManager), m_anemoi(anemoi){}
@@ -17,6 +18,12 @@ namespace endeus {
 		}
 		if (auto* fade = instr.getIf<Instruction::FadeLayer>()) {
 			return handleFadeLayer(*fade);	// 不阻塞 Director 调度, 继续推进剧情
+		}
+		if (auto* bgm = instr.getIf<Instruction::PlayBGM>()) {
+			return handlePlayBGM(*bgm);
+		}
+		if (auto* se = instr.getIf<Instruction::PlaySE>()) {
+			return handlePlaySE(*se);
 		}
 		if (auto* speaker = instr.getIf<Instruction::SetSpeaker>()) {
 			return handleSetSpeaker(*speaker);
@@ -102,6 +109,16 @@ namespace endeus {
 
 		m_worldManager.setLayerAlpha(id, instr.toAlpha);		// 直接记录最终效果, 插值由动画系统负责
 		return true;
+	}
+
+	bool Executor::handlePlayBGM(const Instruction::PlayBGM& instr) {
+		GloriousDays::getInstance().playBGM(instr.path);
+		return true;
+	}
+
+	bool Executor::handlePlaySE(const Instruction::PlaySE& instr) {
+		GloriousDays::getInstance().playSE(instr.path);
+		return true;	// 直接完成
 	}
 
 	bool Executor::handleSetSpeaker(const Instruction::SetSpeaker& instr) {
