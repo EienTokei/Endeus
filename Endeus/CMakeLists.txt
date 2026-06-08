@@ -3,21 +3,22 @@
 #
 
 # 查找 SFML（vcpkg 会自动提供路径）
-find_package(SFML COMPONENTS Graphics Window System REQUIRED)
+find_package(SFML COMPONENTS Graphics Window System Audio REQUIRED)
 # 查找 spdlog
 find_package(spdlog CONFIG REQUIRED) 
 
 # 将源代码添加到此项目的可执行文件。
 set(SOURCES
-    src/main.cpp
-    src/engine/Engine.cpp
-    src/director/Director.cpp
-    src/anemoi/Anemoi.cpp
-    src/executor/Executor.cpp
-    src/renderer/Renderer.cpp
-    src/world/WorldManager.cpp
-    # ... 其他源文件
- "src/album/WhiteAlbum.cpp")
+    "src/main.cpp"
+    "src/engine/Engine.cpp"
+    "src/director/Director.cpp"
+    "src/anemoi/Anemoi.cpp"
+    "src/executor/Executor.cpp"
+    "src/renderer/Renderer.cpp"
+    "src/world/WorldManager.cpp"
+    "src/album/WhiteAlbum.cpp"
+    "src/audio/GloriousDays.cpp"
+)
 
 add_executable(Endeus ${SOURCES})
 
@@ -33,6 +34,7 @@ target_link_libraries(Endeus PRIVATE
     SFML::Graphics
     SFML::Window
     SFML::System
+    SFML::Audio
     spdlog::spdlog
 )
 
