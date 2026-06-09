@@ -49,6 +49,18 @@ namespace endeus {
 		 */
 		void buildScripts();
 
+		/**
+		 * @brief 清理场景以进行跳转
+		 * @details 停止所有音频、停止所有动画、清理渲染器中的临时状态
+		 */
+		void clearScene();
+
+		/**
+		 * @brief.处理 Director 返回的结果
+		 * @param result Director update() 返回的动作
+		 */
+		void handleDirectorResult(const DirectorResult& result);
+
 		WorldManager m_worldManager;
 		sf::RenderWindow m_window;
 		Leyline m_leyline;

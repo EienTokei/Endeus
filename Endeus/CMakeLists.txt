@@ -46,7 +46,7 @@ set_target_properties(Endeus PROPERTIES
 )
 
 # 清理并复制 assets 文件夹到可执行文件输出目录
-add_custom_command(TARGET Endeus POST_BUILD
+add_custom_command(TARGET Endeus PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E remove_directory "$<TARGET_FILE_DIR:Endeus>/assets"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/assets"

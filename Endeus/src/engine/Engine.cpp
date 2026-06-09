@@ -15,6 +15,7 @@ namespace endeus {
 		m_director.init(m_script);
 		SPDLOG_DEBUG("Director initialized with {} instructions", m_script.size());
 
+		// SFML 音频后端首次初始化可能会造成比较明显的延迟，未来会添加启动画面掩盖这个延迟
 		GloriousDays::getInstance().setBGMVolume(25.f);
 		GloriousDays::getInstance().setSEVolume(50.f);
 		GloriousDays::getInstance().setVOVolume(30.f);
@@ -28,9 +29,7 @@ namespace endeus {
 
 			const std::string& target = choice->targetLabel;
 			if (m_album.hasLeaf(target)) {
-				GloriousDays::getInstance().clear();
-				m_anemoi.clear();
-				m_renderer.clear();
+				clearScene();
 				m_album.recall(target);
 			}
 			// 没有记忆则不回滚
@@ -61,29 +60,7 @@ namespace endeus {
 			}
 
 			auto result = m_director.update(dt);
-			switch (result.action) {
-			case DirectorAction::Memorize:
-				SPDLOG_DEBUG("DirectorAction::Memorize for label: {}", result.targetLabel.value());
-				m_album.memorize(result.targetLabel.value());
-				break;
-			case DirectorAction::Recall:
-				if (m_album.hasLeaf(result.targetLabel.value())) {
-					SPDLOG_DEBUG("Recall label: {} (found in album)", result.targetLabel.value());
-					GloriousDays::getInstance().clear();
-					m_anemoi.clear();
-					m_renderer.clear();
-					m_album.recall(result.targetLabel.value());
-				}
-				else {	// 没有这一页, 可能是未来的事情
-					SPDLOG_WARN("Recall failed: label '{}' not found in album", result.targetLabel.value());
-				}
-				break;
-			case DirectorAction::Waiting:
-				break;
-			case DirectorAction::Terminated:
-				SPDLOG_INFO("Director terminated");
-				break;
-			}
+			handleDirectorResult(result);
 
 			GloriousDays::getInstance().update();
 			m_anemoi.update(dt);
@@ -117,8 +94,8 @@ namespace endeus {
 	void Engine::loadAssets() {
 		SPDLOG_INFO("Loading assets...");
 		sf::Font font;
-		if (!font.openFromFile("assets/simkai.ttf")) {
-			SPDLOG_ERROR("Failed to open font: assets/simkai.ttf");
+		if (!font.openFromFile("assets/fonts/simkai.ttf")) {
+			SPDLOG_ERROR("Failed to open font: assets/fonts/simkai.ttf");
 			throw std::runtime_error("Failed to open font");
 		}
 		SPDLOG_DEBUG("Font loaded: simkai.ttf");
@@ -134,10 +111,10 @@ namespace endeus {
 			SPDLOG_DEBUG("Texture registered: {} <- {}", key, path);
 		};
 
-		loadTex("bg_janus", "assets/bg_janus.png");
-		loadTex("door_sprite", "assets/door_sprite.png");
-		loadTex("ev_reader", "assets/ev_reader.png");
-		loadTex("ev_writer", "assets/ev_writer.png");
+		loadTex("bg_janus", "assets/images/bg/bg_janus.png");
+		loadTex("door_sprite", "assets/images/fg/door_sprite.png");
+		loadTex("ev_reader", "assets/images/ev/ev_reader.png");
+		loadTex("ev_writer", "assets/images/ev/ev_writer.png");
 
 		SPDLOG_INFO("All assets loaded successfully");
 	}
@@ -157,7 +134,7 @@ namespace endeus {
 			Instr(Instr::Wait()),
 
 			Instr(Instr::Label{"restart"}),
-			Instr(Instr::PlayBGM{"assets/bgm_rain.ogg"}),
+			Instr(Instr::PlayBGM{"assets/audio/bgm/bgm_rain.ogg"}),
 			Instr(Instr::ShowLayer{"door", "door_sprite", {600,200}, 0.f, 1, {}}),
 			Instr(Instr::FadeLayer{"door", 0.8f, 1.f}),
 
@@ -181,7 +158,7 @@ namespace endeus {
 			Instr(Instr::Choice{{{"写者", "writer"}, {"读者", "reader"}, {"我再想想", "restart"}}}),
 			// 分支
 			Instr(Instr::Label{"writer"}),
-			Instr(Instr::PlaySE{"assets/se_door_open.ogg"}),
+			Instr(Instr::PlaySE{"assets/audio/se/se_door_open.ogg"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_writer", "ev_writer", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"ev_writer", 1.0f, 1.5f}),
@@ -192,7 +169,7 @@ namespace endeus {
 			Instr(Instr::End{true}),
 
 			Instr(Instr::Label{"reader"}),
-			Instr(Instr::PlaySE{"assets/se_door_open.ogg"}),
+			Instr(Instr::PlaySE{"assets/audio/se/se_door_open.ogg"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_reader", "ev_reader", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"ev_reader", 1.0f, 1.f}),
@@ -204,98 +181,98 @@ namespace endeus {
 			Instr(Instr::SetContent{"现在，该踏入世界了，愚者。", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayBGM{"assets/bgm_dark.flac"}),
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000124.ogg"}),
+			Instr(Instr::PlayBGM{"assets/audio/bgm/bgm_dark.flac"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000124.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——大家，能听见吗？」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000125.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000125.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——让我聆听吧。大家的意志」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000126.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000126.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——我，也许要失去翅膀了」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000127.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000127.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——也许这是最后一次，引发不可思议的奇迹」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000128.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000128.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「即便如此，也没关系吗？」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000129.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000129.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——谢谢大家", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000130.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000130.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——安德洛墨达", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000131.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000131.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——可以把我....变回普通的吸血鬼吗？", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000132.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000132.ogg"}),
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"——明白。如果是这种程度的『愿望』，不会超越星辰负荷上限", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000133.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000133.ogg"}),
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"——虽然也可以把种族设定成人种或者兽人", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000134.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000134.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"不。吸血鬼就可以了。我....为自己生为阿莉安娜·哈特贝尔而骄傲", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000135.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000135.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"我会降临到我自己身上", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000136.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000136.ogg"}),
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"在你个人欲求范围内的愿望我都能彻底实现，所以的确可以避免你完全升华为观测者的命运", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000137.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000137.ogg"}),
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"但是，在重生为吸血鬼的瞬间—你将再也无法行使我的权能。即便如此，也可以吗？", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000138.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000138.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"嗯。我不会再....依赖安德洛墨达了。今后的路我会凭自己的双脚走下去", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000139.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000139.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——拜拜。安德洛墨达", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000140.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000140.ogg"}),
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"谢谢你拯救了我们，拯救了世界", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000141.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000141.ogg"}),
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"呵....明白", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000142.ogg"}),
+			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000142.ogg"}),
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"钻石星辰安德洛墨达，启动—自此开始无期限地自主运行", false}),
 			Instr(Instr::Wait()),
@@ -303,6 +280,37 @@ namespace endeus {
 			Instr(Instr::End{true}),
 		};
 		SPDLOG_DEBUG("Built script with {} instructions", m_script.size());
+	}
+
+	void Engine::clearScene() {
+		GloriousDays::getInstance().clear();
+		m_anemoi.clear();
+		m_renderer.clear();
+		SPDLOG_DEBUG("Scene cleared (audio, anemoi, renderer)");
+	}
+
+	void Engine::handleDirectorResult(const DirectorResult& result) {
+		switch (result.action) {
+		case DirectorAction::Memorize:
+			SPDLOG_DEBUG("DirectorAction::Memorize for label: {}", result.targetLabel.value());
+			m_album.memorize(result.targetLabel.value());
+			break;
+		case DirectorAction::Recall:
+			if (m_album.hasLeaf(result.targetLabel.value())) {
+				SPDLOG_DEBUG("Recall label: {} (found in album)", result.targetLabel.value());
+				clearScene();
+				m_album.recall(result.targetLabel.value());
+			}
+			else {	// 没有这一页, 可能是未来的事情
+				SPDLOG_WARN("Recall failed: label '{}' not found in album", result.targetLabel.value());
+			}
+			break;
+		case DirectorAction::Waiting:
+			break;
+		case DirectorAction::Terminated:
+			SPDLOG_INFO("Director terminated");
+			break;
+		}
 	}
 
 } // namespace endeus
