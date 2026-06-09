@@ -1,6 +1,7 @@
 #include "Engine.hpp"
 #include "../utils/Logger.hpp"
 #include "../audio/GloriousDays.hpp"
+#include "../asset/AssetManager.hpp"
 
 namespace endeus {
 
@@ -11,6 +12,7 @@ namespace endeus {
 		, m_album(m_director, m_worldManager){
 		m_window.setFramerateLimit(60);   // 限制 60 FPS
 		loadAssets();
+		mountResources();
 		buildScripts();
 		m_director.init(m_script);
 		SPDLOG_DEBUG("Director initialized with {} instructions", m_script.size());
@@ -91,8 +93,46 @@ namespace endeus {
 		}
 	}
 
+	void Engine::mountResources() {
+		auto& assets = AssetManager::getInstance();
+
+		// 纹理
+		assets.mount("bg_janus", "assets/images/bg/bg_janus.png");
+		assets.mount("door_sprite", "assets/images/fg/door_sprite.png");
+		assets.mount("ev_reader", "assets/images/ev/ev_reader.png");
+		assets.mount("ev_writer", "assets/images/ev/ev_writer.png");
+
+		// BGM
+		assets.mount("bgm_rain", "assets/audio/bgm/bgm_rain.ogg");
+		assets.mount("bgm_dark", "assets/audio/bgm/bgm_dark.flac");
+
+		// SE
+		assets.mount("se_door_open", "assets/audio/se/se_door_open.ogg");
+
+		// VO
+		assets.mount("vo_ari_124", "assets/audio/vo/ja2_ari_b000124.ogg");
+		assets.mount("vo_ari_125", "assets/audio/vo/ja2_ari_b000125.ogg");
+		assets.mount("vo_ari_126", "assets/audio/vo/ja2_ari_b000126.ogg");
+		assets.mount("vo_ari_127", "assets/audio/vo/ja2_ari_b000127.ogg");
+		assets.mount("vo_ari_128", "assets/audio/vo/ja2_ari_b000128.ogg");
+		assets.mount("vo_ari_129", "assets/audio/vo/ja2_ari_b000129.ogg");
+		assets.mount("vo_ari_130", "assets/audio/vo/ja2_ari_b000130.ogg");
+		assets.mount("vo_ari_131", "assets/audio/vo/ja2_ari_b000131.ogg");
+		assets.mount("vo_ari_132", "assets/audio/vo/ja2_ari_b000132.ogg");
+		assets.mount("vo_ari_133", "assets/audio/vo/ja2_ari_b000133.ogg");
+		assets.mount("vo_ari_134", "assets/audio/vo/ja2_ari_b000134.ogg");
+		assets.mount("vo_ari_135", "assets/audio/vo/ja2_ari_b000135.ogg");
+		assets.mount("vo_ari_136", "assets/audio/vo/ja2_ari_b000136.ogg");
+		assets.mount("vo_ari_137", "assets/audio/vo/ja2_ari_b000137.ogg");
+		assets.mount("vo_ari_138", "assets/audio/vo/ja2_ari_b000138.ogg");
+		assets.mount("vo_ari_139", "assets/audio/vo/ja2_ari_b000139.ogg");
+		assets.mount("vo_ari_140", "assets/audio/vo/ja2_ari_b000140.ogg");
+		assets.mount("vo_ari_141", "assets/audio/vo/ja2_ari_b000141.ogg");
+		assets.mount("vo_ari_142", "assets/audio/vo/ja2_ari_b000142.ogg");
+	}
+
 	void Engine::loadAssets() {
-		SPDLOG_INFO("Loading assets...");
+		SPDLOG_INFO("Loading font assets...");
 		sf::Font font;
 		if (!font.openFromFile("assets/fonts/simkai.ttf")) {
 			SPDLOG_ERROR("Failed to open font: assets/fonts/simkai.ttf");
@@ -101,22 +141,7 @@ namespace endeus {
 		SPDLOG_DEBUG("Font loaded: simkai.ttf");
 		m_renderer.setFont(font);
 
-		auto loadTex = [this](const std::string& key, const std::string& path) {
-			sf::Texture tex;
-			if (!tex.loadFromFile(path)) {
-				SPDLOG_ERROR("Failed to load texture: {} from {}", key, path);
-				throw std::runtime_error("Missing " + path);
-			}
-			m_renderer.registerTexture(key, std::move(tex));
-			SPDLOG_DEBUG("Texture registered: {} <- {}", key, path);
-		};
-
-		loadTex("bg_janus", "assets/images/bg/bg_janus.png");
-		loadTex("door_sprite", "assets/images/fg/door_sprite.png");
-		loadTex("ev_reader", "assets/images/ev/ev_reader.png");
-		loadTex("ev_writer", "assets/images/ev/ev_writer.png");
-
-		SPDLOG_INFO("All assets loaded successfully");
+		SPDLOG_INFO("All font assets loaded successfully");
 	}
 
 	void Engine::buildScripts() {
@@ -128,13 +153,13 @@ namespace endeus {
 
 			Instr(Instr::SetSpeaker{"Endeus"}),
 			Instr(Instr::SetContent{"......", false}),
-			Instr(Instr::Wait()),		// 等待点击
+			Instr(Instr::Wait()),
 
 			Instr(Instr::SetContent{"............", false}),
 			Instr(Instr::Wait()),
 
 			Instr(Instr::Label{"restart"}),
-			Instr(Instr::PlayBGM{"assets/audio/bgm/bgm_rain.ogg"}),
+			Instr(Instr::PlayBGM{"bgm_rain"}),
 			Instr(Instr::ShowLayer{"door", "door_sprite", {600,200}, 0.f, 1, {}}),
 			Instr(Instr::FadeLayer{"door", 0.8f, 1.f}),
 
@@ -145,7 +170,6 @@ namespace endeus {
 			Instr(Instr::SetContent{"读者借我踏入世界。", true}),
 			Instr(Instr::Wait()),
 
-			//Instr(Instr::MoveLayer{"door", {400, 400}, 0.f}),
 			Instr(Instr::SetContent{"他们从未见面，却完成同一次传递。", false}),
 			Instr(Instr::Wait()),
 
@@ -153,12 +177,11 @@ namespace endeus {
 			Instr(Instr::Wait()),
 
 			Instr(Instr::FadeLayer{"bg_janus", 0.0f, 1.f}),
-			//Instr(Instr::HideLayer {"bg_janus"}),
 			// 选项
 			Instr(Instr::Choice{{{"写者", "writer"}, {"读者", "reader"}, {"我再想想", "restart"}}}),
 			// 分支
 			Instr(Instr::Label{"writer"}),
-			Instr(Instr::PlaySE{"assets/audio/se/se_door_open.ogg"}),
+			Instr(Instr::PlaySE{"se_door_open"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_writer", "ev_writer", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"ev_writer", 1.0f, 1.5f}),
@@ -169,7 +192,7 @@ namespace endeus {
 			Instr(Instr::End{true}),
 
 			Instr(Instr::Label{"reader"}),
-			Instr(Instr::PlaySE{"assets/audio/se/se_door_open.ogg"}),
+			Instr(Instr::PlaySE{"se_door_open"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_reader", "ev_reader", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"ev_reader", 1.0f, 1.f}),
@@ -181,98 +204,98 @@ namespace endeus {
 			Instr(Instr::SetContent{"现在，该踏入世界了，愚者。", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayBGM{"assets/audio/bgm/bgm_dark.flac"}),
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000124.ogg"}),
+			Instr(Instr::PlayBGM{"bgm_dark"}),
+			Instr(Instr::PlayVO{"vo_ari_124"}),                  // ja2_ari_b000124.ogg
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——大家，能听见吗？」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000125.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_125"}),                  // b000125
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——让我聆听吧。大家的意志」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000126.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_126"}),                  // b000126
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——我，也许要失去翅膀了」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000127.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_127"}),                  // b000127
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「——也许这是最后一次，引发不可思议的奇迹」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000128.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_128"}),                  // b000128
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"「即便如此，也没关系吗？」", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000129.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_129"}),                  // b000129
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——谢谢大家", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000130.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_130"}),                  // b000130
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——安德洛墨达", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000131.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_131"}),                  // b000131
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——可以把我....变回普通的吸血鬼吗？", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000132.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_132"}),                  // b000132
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"——明白。如果是这种程度的『愿望』，不会超越星辰负荷上限", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000133.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_133"}),                  // b000133
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"——虽然也可以把种族设定成人种或者兽人", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000134.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_134"}),                  // b000134
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"不。吸血鬼就可以了。我....为自己生为阿莉安娜·哈特贝尔而骄傲", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000135.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_135"}),                  // b000135
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"我会降临到我自己身上", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000136.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_136"}),                  // b000136
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"在你个人欲求范围内的愿望我都能彻底实现，所以的确可以避免你完全升华为观测者的命运", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000137.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_137"}),                  // b000137
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"但是，在重生为吸血鬼的瞬间—你将再也无法行使我的权能。即便如此，也可以吗？", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000138.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_138"}),                  // b000138
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"嗯。我不会再....依赖安德洛墨达了。今后的路我会凭自己的双脚走下去", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000139.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_139"}),                  // b000139
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"——拜拜。安德洛墨达", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000140.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_140"}),                  // b000140
 			Instr(Instr::SetSpeaker{"爱莉安娜"}),
 			Instr(Instr::SetContent{"谢谢你拯救了我们，拯救了世界", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000141.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_141"}),                  // b000141
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"呵....明白", false}),
 			Instr(Instr::Wait()),
 
-			Instr(Instr::PlayVO{"assets/audio/vo/ja2_ari_b000142.ogg"}),
+			Instr(Instr::PlayVO{"vo_ari_142"}),                  // b000142
 			Instr(Instr::SetSpeaker{"安德洛墨达"}),
 			Instr(Instr::SetContent{"钻石星辰安德洛墨达，启动—自此开始无期限地自主运行", false}),
 			Instr(Instr::Wait()),

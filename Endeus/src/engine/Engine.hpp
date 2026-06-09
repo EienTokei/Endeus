@@ -38,7 +38,12 @@ namespace endeus {
 		void processEvents();
 
 		/**
-		 * @brief 从 assets 目录加载所有纹理和字体
+		 * @brief 挂载硬编码的资源别名映射.
+		 */
+		void mountResources();
+
+		/**
+		 * @brief 从 assets 目录加载字体
 		 * @throws std::runtime_error 任一资源加载失败时抛出
 		 */
 		void loadAssets();

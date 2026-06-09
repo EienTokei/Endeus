@@ -18,7 +18,7 @@ set(SOURCES
     "src/world/WorldManager.cpp"
     "src/album/WhiteAlbum.cpp"
     "src/audio/GloriousDays.cpp"
-)
+ "src/asset/AssetManager.cpp")
 
 add_executable(Endeus ${SOURCES})
 

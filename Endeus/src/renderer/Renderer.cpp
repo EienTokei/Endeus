@@ -1,6 +1,7 @@
 #include "Renderer.hpp"
 #include "../anemoi/Anemos.hpp"
 #include "../utils/Logger.hpp"
+#include "../asset/AssetManager.hpp"
 
 namespace endeus {
 
@@ -14,11 +15,6 @@ namespace endeus {
 			}
 		});
 		SPDLOG_DEBUG("Renderer subscribed to MouseClicked events");
-	}
-
-	void Renderer::registerTexture(const std::string& key, sf::Texture&& texture) {
-		SPDLOG_TRACE("Renderer registerTexture: key='{}'", key);
-		m_textures[key] = std::make_unique<sf::Texture>(std::move(texture));
 	}
 
 	void Renderer::setFont(const sf::Font& font) {
@@ -76,19 +72,19 @@ namespace endeus {
 
 	void Renderer::syncDirtyLayers(const World& world) {
 		for (auto& [id, data] : world.layers) {
-			auto texIt = m_textures.find(data.textureKey);		// 1. 查找纹理
-			if (texIt == m_textures.end()) {
+			auto texHandle = AssetManager::getInstance().getTexture(data.textureKey);		// 1. 查找纹理
+			if (!texHandle) {
 				// 纹理不存在，跳过
 				SPDLOG_WARN("syncDirtyLayers: no texture '{}' for layer '{}'", data.textureKey, id);
 				data.dirty = false;
 				continue;
 			}
-
+			sf::Texture* tex = texHandle.get();
 			auto spriteIt = m_layers.find(id);					// 2. 是否存在缓存
 			bool needCreate = (spriteIt == m_layers.end());
 			if (needCreate) {
 				// 创建新 Sprite
-				auto sprite = std::make_unique<sf::Sprite>(*texIt->second);
+				auto sprite = std::make_unique<sf::Sprite>(*tex);
 				m_layers[id] = std::move(sprite);
 			}
 
@@ -96,8 +92,8 @@ namespace endeus {
 				// 更新 Sprite 的属性
 				sf::Sprite* sprite = m_layers[id].get();
 				// 纹理改变
-				if (&sprite->getTexture() != texIt->second.get()) {
-					sprite->setTexture(*texIt->second, true);
+				if (&sprite->getTexture() != tex) {
+					sprite->setTexture(*tex, true);
 				}
 
 				sprite->setPosition({ data.position.x, data.position.y });

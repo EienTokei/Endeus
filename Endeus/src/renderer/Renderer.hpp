@@ -14,7 +14,6 @@ namespace endeus {
 	public:
 		Renderer(Leyline& leyline, sf::RenderWindow& window, Anemoi& anemoi);
 
-		void registerTexture(const std::string& key, sf::Texture&& texture);
 		void setFont(const sf::Font& font);
 
 		void draw(const World& world, std::vector<Instruction::Choice::Option> options);
@@ -37,7 +36,6 @@ namespace endeus {
 		Leyline& m_leyline;
 		sf::RenderWindow& m_window;
 		const Anemoi& m_anemoi;
-		std::unordered_map<std::string, std::unique_ptr<sf::Texture>> m_textures;	// textureKey -> Texture
 		std::unordered_map<std::string, std::unique_ptr<sf::Sprite>> m_layers;		// layerId -> Sprite
 		sf::Font m_font;
 
