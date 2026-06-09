@@ -28,8 +28,13 @@ namespace endeus {
 
 		void playSE(const std::filesystem::path& filepath);
 
+		void playVO(const std::filesystem::path& filepath);
+
+		void stopVO();
+
 		void setBGMVolume(float volume);
 		void setSEVolume(float volume);
+		void setVOVolume(float volume);
 
 		void update();
 
@@ -44,6 +49,10 @@ namespace endeus {
 
 		std::vector<sf::Sound> m_activeSEs;
 		float m_seVolume = 100.f;
-		std::unordered_map<std::string, sf::SoundBuffer> m_soundBuffers;
+		std::unordered_map<std::string, sf::SoundBuffer> m_seBuffers;
+
+		std::optional<sf::Sound> m_vo;
+		std::unordered_map<std::string, sf::SoundBuffer> m_voBuffers;
+		float m_voVolume = 100.f;
 	};
 }

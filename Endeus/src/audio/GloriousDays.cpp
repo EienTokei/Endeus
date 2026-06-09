@@ -24,14 +24,14 @@ namespace endeus {
 	}
 
 	void GloriousDays::playSE(const std::filesystem::path& filepath) {
-		auto it = m_soundBuffers.find(filepath.string());
-		if (it == m_soundBuffers.end()) {
+		auto it = m_seBuffers.find(filepath.string());
+		if (it == m_seBuffers.end()) {
 			sf::SoundBuffer buffer;
 			if (!buffer.loadFromFile(filepath)) {
 				SPDLOG_ERROR("Failed to load SE: {}", filepath.string());
 				return;
 			}
-			it = m_soundBuffers.emplace(filepath.string(), std::move(buffer)).first;
+			it = m_seBuffers.emplace(filepath.string(), std::move(buffer)).first;
 		}
 
 		// 直接在容器中构造，SFML 的 sf::Sound 移动构造函数没有转移播放状态
@@ -40,6 +40,34 @@ namespace endeus {
 		sound.play();
 
 		SPDLOG_DEBUG("SE played: {}", filepath.string());
+	}
+
+	void GloriousDays::playVO(const std::filesystem::path& filepath) {
+		auto it = m_voBuffers.find(filepath.string());
+		if (it == m_voBuffers.end()) {
+			sf::SoundBuffer buffer;
+			if (!buffer.loadFromFile(filepath)) {
+				SPDLOG_ERROR("Failed to load VO: {}", filepath.string());
+				return;
+			}
+			it = m_voBuffers.emplace(filepath.string(), std::move(buffer)).first;
+		}
+
+		if (!m_vo.has_value()) {
+			m_vo.emplace(it->second);
+		}
+		else {
+			m_vo->setBuffer(it->second);
+		}
+		m_vo->setVolume(m_voVolume);
+		m_vo->play();
+
+		SPDLOG_DEBUG("VO played: {}", filepath.string());
+	}
+
+	void GloriousDays::stopVO() {
+		m_vo->stop();
+		SPDLOG_DEBUG("VO stopped");
 	}
 
 	void GloriousDays::setBGMVolume(float volume) {
@@ -54,6 +82,13 @@ namespace endeus {
 		}
 	}
 
+	void GloriousDays::setVOVolume(float volume) {
+		m_voVolume = std::clamp(volume, 0.f, 100.f);
+		if (m_vo.has_value()) {
+			m_vo->setVolume(m_voVolume);
+		}
+	}
+
 	void GloriousDays::update() {
 		size_t erased = std::erase_if(m_activeSEs, [](const auto& se) {
 			return se.getStatus() == sf::Sound::Status::Stopped;
@@ -65,7 +100,7 @@ namespace endeus {
 
 	void GloriousDays::clear() {
 		m_activeSEs.clear();
-		m_soundBuffers.clear();
+		m_seBuffers.clear();
 		m_bgm.stop();
 		SPDLOG_DEBUG("Cleared all sound caches and stopped all playing sounds");
 	}

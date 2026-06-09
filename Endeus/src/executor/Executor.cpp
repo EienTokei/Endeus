@@ -25,6 +25,9 @@ namespace endeus {
 		if (auto* se = instr.getIf<Instruction::PlaySE>()) {
 			return handlePlaySE(*se);
 		}
+		if (auto* vo = instr.getIf<Instruction::PlayVO>()) {
+			return handlePlayVO(*vo);
+		}
 		if (auto* speaker = instr.getIf<Instruction::SetSpeaker>()) {
 			return handleSetSpeaker(*speaker);
 		}
@@ -118,6 +121,11 @@ namespace endeus {
 
 	bool Executor::handlePlaySE(const Instruction::PlaySE& instr) {
 		GloriousDays::getInstance().playSE(instr.path);
+		return true;	// 直接完成
+	}
+
+	bool Executor::handlePlayVO(const Instruction::PlayVO& instr) {
+		GloriousDays::getInstance().playVO(instr.path);
 		return true;	// 直接完成
 	}
 

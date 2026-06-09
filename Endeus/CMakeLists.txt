@@ -76,6 +76,7 @@ target_link_libraries(EndeusTests PRIVATE
     SFML::Graphics
     SFML::Window
     SFML::System
+    SFML::Audio
     GTest::gtest
     GTest::gtest_main
     spdlog::spdlog

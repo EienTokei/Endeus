@@ -72,6 +72,11 @@ namespace endeus {
 			std::string path;
 		};
 
+		/// 播放 VO
+		struct PlayVO {
+			std::string path;
+		};
+
 		// ========================= 流程控制类指令 =========================
 
 		/// 选项分支
@@ -153,6 +158,7 @@ namespace endeus {
 			FadeLayer,
 			PlayBGM,
 			PlaySE,
+			PlayVO,
 			SetSpeaker,
 			SetContent,
 			Choice,

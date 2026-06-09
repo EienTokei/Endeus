@@ -17,6 +17,7 @@ namespace endeus {
 
 		GloriousDays::getInstance().setBGMVolume(25.f);
 		GloriousDays::getInstance().setSEVolume(50.f);
+		GloriousDays::getInstance().setVOVolume(30.f);
 
 		// 订阅选项
 		m_leyline.subscribe<Event::ChoiceSelected>([this](const Event& e) {
@@ -147,25 +148,33 @@ namespace endeus {
 			// 初始画面
 			Instr(Instr::ShowLayer{"bg_janus", "bg_janus", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"bg_janus", 1.0f, 1.f}),
+
 			Instr(Instr::SetSpeaker{"Endeus"}),
 			Instr(Instr::SetContent{"......", false}),
 			Instr(Instr::Wait()),		// 等待点击
+
 			Instr(Instr::SetContent{"............", false}),
 			Instr(Instr::Wait()),
+
 			Instr(Instr::Label{"restart"}),
-			Instr(Instr::PlayBGM{"assets/bgm.ogg"}),
+			Instr(Instr::PlayBGM{"assets/bgm_rain.ogg"}),
 			Instr(Instr::ShowLayer{"door", "door_sprite", {600,200}, 0.f, 1, {}}),
 			Instr(Instr::FadeLayer{"door", 0.8f, 1.f}),
+
 			Instr(Instr::SetContent{"写者借我构建故事。", false}),
 			Instr(Instr::Wait()),
+
 			Instr(Instr::MoveLayer{"door", {200, 200}, 3.f}),
 			Instr(Instr::SetContent{"读者借我踏入世界。", true}),
 			Instr(Instr::Wait()),
+
 			//Instr(Instr::MoveLayer{"door", {400, 400}, 0.f}),
 			Instr(Instr::SetContent{"他们从未见面，却完成同一次传递。", false}),
 			Instr(Instr::Wait()),
+
 			Instr(Instr::SetContent{"你希望以何种身份经过这扇门？", false}),
 			Instr(Instr::Wait()),
+
 			Instr(Instr::FadeLayer{"bg_janus", 0.0f, 1.f}),
 			//Instr(Instr::HideLayer {"bg_janus"}),
 			// 选项
@@ -175,17 +184,122 @@ namespace endeus {
 			Instr(Instr::PlaySE{"assets/se_door_open.ogg"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_writer", "ev_writer", {0,0}, 0.f, 0, {}}),
-			Instr(Instr::FadeLayer{"ev_writer", 1.0f, 1.f}),
+			Instr(Instr::FadeLayer{"ev_writer", 1.0f, 1.5f}),
+
 			Instr(Instr::SetContent{"你选择了写者。故事因你而生。", false}),
 			Instr(Instr::Wait()),
+
 			Instr(Instr::End{true}),
+
 			Instr(Instr::Label{"reader"}),
 			Instr(Instr::PlaySE{"assets/se_door_open.ogg"}),
 			Instr(Instr::FadeLayer{"door", 0.f, 1.f}),
 			Instr(Instr::ShowLayer{"ev_reader", "ev_reader", {0,0}, 0.f, 0, {}}),
 			Instr(Instr::FadeLayer{"ev_reader", 1.0f, 1.f}),
+
 			Instr(Instr::SetContent{"你选择了读者。世界因你而在。", false}),
 			Instr(Instr::Wait()),
+
+			Instr(Instr::FadeLayer{"ev_reader", 0.0f, 0.5f}),
+			Instr(Instr::SetContent{"现在，该踏入世界了，愚者。", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayBGM{"assets/bgm_dark.flac"}),
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000124.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"「——大家，能听见吗？」", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000125.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"「——让我聆听吧。大家的意志」", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000126.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"「——我，也许要失去翅膀了」", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000127.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"「——也许这是最后一次，引发不可思议的奇迹」", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000128.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"「即便如此，也没关系吗？」", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000129.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"——谢谢大家", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000130.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"——安德洛墨达", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000131.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"——可以把我....变回普通的吸血鬼吗？", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000132.ogg"}),
+			Instr(Instr::SetSpeaker{"安德洛墨达"}),
+			Instr(Instr::SetContent{"——明白。如果是这种程度的『愿望』，不会超越星辰负荷上限", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000133.ogg"}),
+			Instr(Instr::SetSpeaker{"安德洛墨达"}),
+			Instr(Instr::SetContent{"——虽然也可以把种族设定成人种或者兽人", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000134.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"不。吸血鬼就可以了。我....为自己生为阿莉安娜·哈特贝尔而骄傲", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000135.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"我会降临到我自己身上", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000136.ogg"}),
+			Instr(Instr::SetSpeaker{"安德洛墨达"}),
+			Instr(Instr::SetContent{"在你个人欲求范围内的愿望我都能彻底实现，所以的确可以避免你完全升华为观测者的命运", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000137.ogg"}),
+			Instr(Instr::SetSpeaker{"安德洛墨达"}),
+			Instr(Instr::SetContent{"但是，在重生为吸血鬼的瞬间—你将再也无法行使我的权能。即便如此，也可以吗？", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000138.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"嗯。我不会再....依赖安德洛墨达了。今后的路我会凭自己的双脚走下去", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000139.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"——拜拜。安德洛墨达", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000140.ogg"}),
+			Instr(Instr::SetSpeaker{"爱莉安娜"}),
+			Instr(Instr::SetContent{"谢谢你拯救了我们，拯救了世界", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000141.ogg"}),
+			Instr(Instr::SetSpeaker{"安德洛墨达"}),
+			Instr(Instr::SetContent{"呵....明白", false}),
+			Instr(Instr::Wait()),
+
+			Instr(Instr::PlayVO{"assets/vo/ja2_ari_b000142.ogg"}),
+			Instr(Instr::SetSpeaker{"安德洛墨达"}),
+			Instr(Instr::SetContent{"钻石星辰安德洛墨达，启动—自此开始无期限地自主运行", false}),
+			Instr(Instr::Wait()),
+
 			Instr(Instr::End{true}),
 		};
 		SPDLOG_DEBUG("Built script with {} instructions", m_script.size());
